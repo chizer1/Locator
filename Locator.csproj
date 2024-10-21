@@ -7,6 +7,7 @@
     <UserSecretsId>d272d42c-e1c2-4586-89f9-7757267944e1</UserSecretsId>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RestorePackagesWithLockFile>True</RestorePackagesWithLockFile>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
