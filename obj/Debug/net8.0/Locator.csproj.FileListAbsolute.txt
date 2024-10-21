@@ -32,3 +32,14 @@
 /home/steve/Documents/Locator/obj/Debug/net8.0/Locator.pdb
 /home/steve/Documents/Locator/obj/Debug/net8.0/Locator.genruntimeconfig.cache
 /home/steve/Documents/Locator/obj/Debug/net8.0/ref/Locator.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.Bcl.TimeProvider.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll
+/home/steve/Documents/Locator/bin/Debug/net8.0/ZiggyCreatures.FusionCache.dll
+/home/steve/Documents/Locator/obj/Debug/net8.0/Locator.sourcelink.json
