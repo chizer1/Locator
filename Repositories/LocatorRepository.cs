@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using Locator.Models;
 
@@ -166,7 +170,7 @@ public class LocatorRepository(IDbConnection locatorDb)
             rowCount,
             pageNumber,
             pageSize,
-            (int)Math.Ceiling((double)rowCount / pageNumber)
+            (int)Math.Ceiling((double)rowCount / pageSize)
         );
     }
 

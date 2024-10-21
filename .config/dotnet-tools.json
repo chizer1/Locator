@@ -8,6 +8,13 @@
         "dotnet-csharpier"
       ],
       "rollForward": false
+    },
+    "schemazen": {
+      "version": "2.2.0",
+      "commands": [
+        "schemazen"
+      ],
+      "rollForward": false
     }
   }
 }
