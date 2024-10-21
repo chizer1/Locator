@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using Locator.Models;
 using Locator.Repositories;
@@ -42,7 +43,13 @@ public partial class LocatorService
         _userId = connection.UserId;
         _clientId = connection.ClientId;
         _clientCode = connection.ClientCode;
-        _clientDb = DatabaseHelper.CreateSqlConnection(connection);
+        _clientDb = new SqlConnection(
+            $@"
+            Server={connection.DatabaseServer};
+            User Id={connection.DatabaseUser};
+            Password={connection.DatabaseUserPassword};
+            Database={connection.DatabaseName};"
+        );
         _cache = cache;
         _validationHelper = validationHelper;
     }
