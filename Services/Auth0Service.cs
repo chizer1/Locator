@@ -9,12 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Locator.Services;
 
-public class Auth0Service(
-    string auth0Url,
-    string auth0ClientId,
-    string auth0ClientSecret,
-    string clientUrl
-)
+public class Auth0Service(string auth0Url, string auth0ClientId, string auth0ClientSecret)
 {
     public async Task<string> GetAccessToken()
     {
@@ -250,7 +245,11 @@ public class Auth0Service(
         return userLogs;
     }
 
-    public async Task<string> GeneratePasswordChangeTicket(string accessToken, string auth0Id)
+    public async Task<string> GeneratePasswordChangeTicket(
+        string accessToken,
+        string auth0Id,
+        string clientUrl
+    )
     {
         using HttpClient client = new();
 

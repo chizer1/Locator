@@ -131,133 +131,32 @@ public partial class LocatorService
         return await _locatorRepo.IsClientActive(clientCode);
     }
 
-    // public async Task<Client> AddClient(AddClient addClient)
-    // {
-    //     var dbName = addClient.ClientName.Replace(" ", "_") + "_DB";
-    //     var dbUser = addClient.ClientName.Replace(" ", "_") + "_App";
+    public async Task<Client> AddClient(AddClient addClient)
+    {
+        var dbName = addClient.ClientName.Replace(" ", "_") + "_DB";
+        var dbUser = addClient.ClientName.Replace(" ", "_") + "_App";
 
-    //     // hash this one day before inserting as plain text?
-    //     var dbPassword = Guid.NewGuid().ToString();
+        var dbPassword = Guid.NewGuid().ToString();
 
-    //     var client = await _locatorRepo.AddClient(addClient, _userId);
+        var client = await _locatorRepo.AddClient(addClient, _userId);
 
-    //     DynamicParameters parameters = new();
-    //     parameters.Add("ClientID", client.ClientId);
-    //     parameters.Add("DatabaseName", dbName);
-    //     parameters.Add("DatabaseUser", dbUser);
-    //     parameters.Add("DatabaseUserPassword", dbPassword);
-    //     parameters.Add("DatabaseServerID", addClient.DatabaseServerId);
-    //     parameters.Add("DatabaseTypeID", DatabaseType.Client);
-    //     parameters.Add("UserID", _userId);
+        var databaseId = await _locatorRepo.AddDatabase(
+            dbName,
+            dbUser,
+            dbPassword,
+            addClient.DatabaseServerId,
+            _userId,
+            client.ClientId
+        );
 
-    //     Console.WriteLine($"Inserting locator records for {dbName}...");
+        await _locatorRepo.AddClientConnection(client.ClientId, databaseId, _userId);
 
-    //     var databaseId = await _locatorRepo.QuerySingleAsync<int>(
-    //         @$"
-    //         insert into dbo.[Database]
-    //         (
-    //             DatabaseName,
-    //             DatabaseUser,
-    //             DatabaseUserPassword,
-    //             DatabaseServerID,
-    //             DatabaseTypeID,
-    //             CreateDate,
-    //             CreateByID,
-    //             ModifyDate,
-    //             ModifyByID
-    //         )
-    //         values
-    //         (
-    //             @DatabaseName,
-    //             @DatabaseUser,
-    //             @DatabaseUserPassword,
-    //             @DatabaseServerID,
-    //             @DatabaseTypeID,
-    //             getutcdate(),
-    //             @UserID,
-    //             getutcdate(),
-    //             @UserID
-    //         )
+        await _locatorRepo.AddPermissions(dbName, dbUser, dbPassword);
 
-    //         declare @DatabaseID int
-    //         set @DatabaseID = scope_identity()
+        await _locatorRepo.UpdateDatabaseStatus(databaseId, true);
 
-    //         insert into dbo.ClientConnection
-    //         (
-    //             ClientID,
-    //             DatabaseID,
-    //             CreateDate,
-    //             CreateByID,
-    //             ModifyDate,
-    //             ModifyByID
-    //         )
-    //         values
-    //         (
-    //             @ClientID,
-    //             @DatabaseID,
-    //             getutcdate(),
-    //             @UserID,
-    //             getutcdate(),
-    //             @UserID
-    //         );
-
-    //         select @DatabaseID",
-    //         parameters
-    //     );
-
-    //     string databaseServerName = await locatorDb.QueryFirstOrDefaultAsync<string>(
-    //         "select DatabaseServerName from dbo.DatabaseServer where DatabaseServerID = @DatabaseServerID",
-    //         new { dataBaseServerId }
-    //     );
-
-    //     Console.WriteLine($"Inserted Locator records for {dbName}!");
-    //     Console.WriteLine($"Creating {dbName}...");
-
-    //     // use database back up and restore instead of schema zen, include seed data
-
-    //     Console.WriteLine($"{dbName} created!");
-    //     Console.WriteLine($"Creating SQL Login for {dbUser}...");
-
-    //     await locatorDb.ExecuteAsync(
-    //         @$"CREATE LOGIN {dbUser} WITH PASSWORD = '{dbPassword}'",
-    //         new { dbUser, dbPassword }
-    //     );
-
-    //     Console.WriteLine($"Created SQL Login for {dbUser}!");
-    //     Console.WriteLine($"Creating {dbUser} user for {dbName} and assigning roles...");
-
-    //     await locatorDb.ExecuteAsync(
-    //         @$"
-    //             use {dbName}
-    //             create user {dbUser} for login {dbUser}
-
-    //             alter role [db_datareader] add member {dbUser}
-
-    //             alter role [db_datawriter] add member {dbUser}
-
-    //             grant control on type::[dbo].[Filter_Int] to {dbUser} as [dbo]
-
-    //             grant control on type::[dbo].[Filter_String] to {dbUser} as [dbo]",
-    //         new { dbUser, dbName }
-    //     );
-
-    //     Console.WriteLine($"Created {dbUser} user for {dbName} and assigned roles!");
-
-    //     var clientDb = DatabaseHelper.CreateClientConnection(
-    //         clientCode,
-    //         _locatorConnectionString,
-    //         DatabaseType.Client
-    //     );
-
-    //     Console.WriteLine($"Activating {dbName}...");
-
-    //     await locatorDb.ExecuteAsync(
-    //         "update dbo.[Database] set IsActive=1 where DatabaseID = @DatabaseID",
-    //         new { databaseId }
-    //     );
-
-    //     Console.WriteLine($"Activated {dbName}!");
-    // }
+        return client;
+    }
 
     private ClientStatus GetClientStatus(string auth0Id)
     {
@@ -313,18 +212,6 @@ public partial class LocatorService
         var userRoles = allRoles.Where(x => addUser.RoleIds.Contains(x.RoleId)).ToList();
         foreach (var role in userRoles)
             await _auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
-
-        var passwordChangeTicket = await _auth0Service.GeneratePasswordChangeTicket(
-            accessToken,
-            auth0Id
-        );
-
-        // _emailService.Send(
-        //     addUser.EmailAddress,
-        //     (int)EmailTemplate.NewAccount,
-        //     addUser,
-        //     passwordChangeTicket.URL
-        // );
 
         return await _locatorRepo.AddUser(addUser, auth0Id, UserId());
     }
@@ -436,7 +323,7 @@ public partial class LocatorService
     {
         var accessToken = await _auth0Service.GetAccessToken();
 
-        return await _auth0Service.GeneratePasswordChangeTicket(accessToken, auth0Id); // outputs url
+        return await _auth0Service.GeneratePasswordChangeTicket(accessToken, auth0Id, "");
     }
 
     public async Task<List<KeyValuePair<int, string>>> GetDatabaseServers()

@@ -34,7 +34,7 @@ public class LocatorRepository(IDbConnection locatorDb)
                 }
             );
     }
-
+    
     public UserStatus GetUserStatus(string auth0Id)
     {
         return (UserStatus)
@@ -316,6 +316,140 @@ public class LocatorRepository(IDbConnection locatorDb)
                     IsAnsi = true,
                     Length = 50,
                 },
+            }
+        );
+    }
+
+    public async Task UpdateDatabaseStatus(int databaseId, bool isActive)
+    {
+        await locatorDb.ExecuteAsync(
+            @$"
+            update [Database]
+            set
+                IsActive = @IsActive
+            where
+                DatabaseID = @DatabaseID",
+            new { databaseId, isActive }
+        );
+    }
+
+    public async Task AddPermissions(
+        string databaseName,
+        string databaseUser,
+        string databasePassword
+    )
+    {
+        await locatorDb.ExecuteAsync(
+            @$"create login {databaseUser} with password = '{databasePassword}'",
+            new { databaseUser, databasePassword }
+        );
+
+        await locatorDb.ExecuteAsync(
+            @$"
+                use {databaseName}
+                create user {databaseUser} for login {databaseUser}
+
+                alter role [db_datareader] add member {databaseUser}
+
+                alter role [db_datawriter] add member {databaseUser}",
+            new { databaseName, databaseUser }
+        );
+    }
+
+    public async Task AddClientConnection(int clientId, int databaseId, int createById)
+    {
+        await locatorDb.ExecuteAsync(
+            @$"
+            insert into dbo.ClientConnection
+            (
+                ClientID,
+                DatabaseID,
+                CreateByID,
+                ModifyByID
+            )
+            values
+            (
+                @ClientID,
+                @DatabaseID,
+                @CreateByID,
+                @CreateByID
+            )",
+            new
+            {
+                clientId,
+                databaseId,
+                createByID = createById,
+            }
+        );
+    }
+
+    public async Task<int> AddDatabaseServer(string databaseServerName, int userID)
+    {
+        return await locatorDb.QuerySingleAsync<int>(
+            @$"
+            insert into dbo.DatabaseServer
+            (
+                DatabaseServerName,
+                CreateByID,
+                ModifyByID
+            )
+            values
+            (
+                @DatabaseServerName,
+                @UserID,
+                @UserID
+            )
+
+            select scope_identity()",
+            new
+            {
+                databaseServerName,
+                userID,
+            }
+        );
+    }
+
+    public async Task<int> AddDatabase(
+        string databaseName,
+        string databaseUser,
+        string databaseUserPassword,
+        int databaseServerId,
+        int databaseTypeId,
+        int userID
+    )
+    {
+        return await locatorDb.QuerySingleAsync<int>(
+            @$"
+            insert into dbo.[Database]
+            (
+                DatabaseName,
+                DatabaseUser,
+                DatabaseUserPassword,
+                DatabaseServerID,
+                DatabaseTypeID,
+                CreateByID,
+                ModifyByID
+            )
+            values
+            (
+                @DatabaseName,
+                @DatabaseUser,
+                @DatabaseUserPassword,
+                @DatabaseServerID,
+                @DatabaseTypeID,
+                @UserID,
+                @UserID
+            )
+            
+            select scope_identity()",
+            new
+            {
+                databaseName,
+                databaseUser,
+                databaseUserPassword,
+                databaseServerId,
+                databaseTypeId,
+                userID,
             }
         );
     }
