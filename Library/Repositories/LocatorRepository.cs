@@ -34,7 +34,7 @@ public class LocatorRepository(IDbConnection locatorDb)
                 }
             );
     }
-    
+
     public UserStatus GetUserStatus(string auth0Id)
     {
         return (UserStatus)
@@ -174,11 +174,9 @@ public class LocatorRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task<Client> AddClient(AddClient addClient, int createById)
+    public async Task<int> AddClient(string clientName, string clientCode, int createById)
     {
-        var clientCode = addClient.ClientName.ToLower().Replace(" ", "");
-
-        await locatorDb.ExecuteAsync(
+        return await locatorDb.QuerySingleAsync<int>(
             @$"
             insert into dbo.Client 
             (
@@ -195,16 +193,16 @@ public class LocatorRepository(IDbConnection locatorDb)
                 1,
                 @CreateByID,
                 @CreateByID
-            )",
+            )
+
+            select scope_identity()",
             new
             {
                 clientCode,
-                addClient.ClientName,
-                createByID = createById,
+                clientName,
+                createById,
             }
         );
-
-        return await GetClient(clientCode);
     }
 
     public async Task<bool> IsClientActive(string clientCode)
@@ -401,11 +399,7 @@ public class LocatorRepository(IDbConnection locatorDb)
             )
 
             select scope_identity()",
-            new
-            {
-                databaseServerName,
-                userID,
-            }
+            new { databaseServerName, userID }
         );
     }
 

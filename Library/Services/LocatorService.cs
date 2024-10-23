@@ -131,32 +131,32 @@ public partial class LocatorService
         return await _locatorRepo.IsClientActive(clientCode);
     }
 
-    public async Task<Client> AddClient(AddClient addClient)
-    {
-        var dbName = addClient.ClientName.Replace(" ", "_") + "_DB";
-        var dbUser = addClient.ClientName.Replace(" ", "_") + "_App";
+    // public async Task<Client> AddClient(AddClient addClient)
+    // {
+    //     var dbName = addClient.ClientName.Replace(" ", "_") + "_DB";
+    //     var dbUser = addClient.ClientName.Replace(" ", "_") + "_App";
 
-        var dbPassword = Guid.NewGuid().ToString();
+    //     var dbPassword = Guid.NewGuid().ToString();
 
-        var client = await _locatorRepo.AddClient(addClient, _userId);
+    //     var client = await _locatorRepo.AddClient(addClient, _userId);
 
-        var databaseId = await _locatorRepo.AddDatabase(
-            dbName,
-            dbUser,
-            dbPassword,
-            addClient.DatabaseServerId,
-            _userId,
-            client.ClientId
-        );
+    //     var databaseId = await _locatorRepo.AddDatabase(
+    //         dbName,
+    //         dbUser,
+    //         dbPassword,
+    //         addClient.DatabaseServerId,
+    //         _userId,
+    //         client.ClientId
+    //     );
 
-        await _locatorRepo.AddClientConnection(client.ClientId, databaseId, _userId);
+    //     await _locatorRepo.AddClientConnection(client.ClientId, databaseId, _userId);
 
-        await _locatorRepo.AddPermissions(dbName, dbUser, dbPassword);
+    //     await _locatorRepo.AddPermissions(dbName, dbUser, dbPassword);
 
-        await _locatorRepo.UpdateDatabaseStatus(databaseId, true);
+    //     await _locatorRepo.UpdateDatabaseStatus(databaseId, true);
 
-        return client;
-    }
+    //     return client;
+    // }
 
     private ClientStatus GetClientStatus(string auth0Id)
     {
