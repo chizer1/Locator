@@ -1,40 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Dapper;
 using Locator.Models;
 
 namespace Locator.Repositories;
 
-public class LocatorRepository(IDbConnection locatorDb)
+internal class LocatorRepository(IDbConnection locatorDb)
 {
-    public ClientStatus GetClientStatus(string auth0Id)
-    {
-        return (ClientStatus)
-            locatorDb.QuerySingle<int>(
-                @$"
-                select
-                    c.ClientStatusID {nameof(Client.ClientStatusId)}
-                from dbo.[User] u
-                inner join dbo.Client c
-                    on c.ClientID = u.ClientID
-                where
-                    u.Auth0ID = @Auth0ID",
-                new
-                {
-                    Auth0ID = new DbString
-                    {
-                        Value = auth0Id,
-                        IsFixedLength = false,
-                        IsAnsi = true,
-                        Length = 50,
-                    },
-                }
-            );
-    }
-
     public UserStatus GetUserStatus(string auth0Id)
     {
         return (UserStatus)
@@ -107,139 +78,6 @@ public class LocatorRepository(IDbConnection locatorDb)
                 from dbo.DatabaseServer"
             )
         ).ToList();
-    }
-
-    public async Task<Client> GetClient(string clientCode)
-    {
-        return await locatorDb.QuerySingleAsync<Client>(
-            @$"
-            select
-                c.ClientID {nameof(Client.ClientId)},
-                c.ClientCode {nameof(Client.ClientCode)},
-                c.ClientName {nameof(Client.ClientName)},
-                c.ClientStatusID {nameof(Client.ClientStatusId)}
-            from dbo.Client c
-            inner join dbo.ClientStatus cs
-                on c.ClientStatusID = cs.ClientStatusID
-            where
-                c.ClientCode = @ClientCode",
-            new
-            {
-                ClientCode = new DbString
-                {
-                    Value = clientCode,
-                    IsFixedLength = false,
-                    IsAnsi = true,
-                    Length = 20,
-                },
-            }
-        );
-    }
-
-    public async Task<PagedList<Client>> GetClients(string keyword, int pageNumber, int pageSize)
-    {
-        var whereClause = keyword == null ? "" : "where c.ClientName like '%' + @Keyword + '%'";
-        var results = await locatorDb.QueryMultipleAsync(
-            @$"
-            select count(*) as TotalCount from dbo.Client c {whereClause}
-
-            select
-                c.ClientID {nameof(Client.ClientId)},
-                c.ClientCode {nameof(Client.ClientCode)},
-                c.ClientName {nameof(Client.ClientName)},
-                c.ClientStatusID {nameof(Client.ClientStatusId)}
-            from dbo.Client c
-            inner join dbo.ClientStatus cs
-                on c.ClientStatusID = cs.ClientStatusID
-            {whereClause}
-            order by
-                c.ClientName asc
-            offset ((@PageNumber - 1) * @PageSize) rows
-            fetch next @PageSize rows only",
-            new
-            {
-                keyword,
-                pageNumber,
-                pageSize,
-            }
-        );
-
-        int rowCount = results.Read<int>().First();
-        return new(
-            results.Read<Client>().ToList(),
-            rowCount,
-            pageNumber,
-            pageSize,
-            (int)Math.Ceiling((double)rowCount / pageSize)
-        );
-    }
-
-    public async Task<int> AddClient(string clientName, string clientCode, int createById)
-    {
-        return await locatorDb.QuerySingleAsync<int>(
-            @$"
-            insert into dbo.Client 
-            (
-                ClientCode,
-                ClientName, 
-                ClientStatusID,
-                CreateByID,
-                ModifyByID
-            )
-            values 
-            (
-                @ClientCode,
-                @ClientName,
-                1,
-                @CreateByID,
-                @CreateByID
-            )
-
-            select scope_identity()",
-            new
-            {
-                clientCode,
-                clientName,
-                createById,
-            }
-        );
-    }
-
-    public async Task<bool> IsClientActive(string clientCode)
-    {
-        return await locatorDb.QueryFirstAsync<bool>(
-            @$"
-            if exists(
-                select top 1 
-                    cc.ClientConnectionID
-                from
-                    ClientConnection cc 
-                inner join [Database] d
-                    on d.DatabaseID = cc.DatabaseID
-                    and d.IsActive = 1
-                where 
-                    ClientID = (
-                        select 
-                            ClientID
-                        from dbo.Client
-                        where
-                            ClientCode = @ClientCode
-                    )
-            )
-                select 1
-            else
-                select 0",
-            new
-            {
-                ClientCode = new DbString
-                {
-                    Value = clientCode,
-                    IsFixedLength = false,
-                    IsAnsi = true,
-                    Length = clientCode.Length,
-                },
-            }
-        );
     }
 
     public async Task<User> GetUser(int userId)
@@ -559,32 +397,6 @@ public class LocatorRepository(IDbConnection locatorDb)
         return await GetUser(updateUser.UserId);
     }
 
-    public async Task UpdateClient(UpdateClient updateClient, int modifyById)
-    {
-        await locatorDb.ExecuteAsync(
-            @$"
-            update [Client]
-            set
-                ClientStatusID = @ClientStatusID,
-                ModifyByID = @ModifyByID,
-                ModifyDate = getdate()
-            where
-                ClientCode = @ClientCode",
-            new
-            {
-                ClientCode = new DbString
-                {
-                    Value = updateClient.ClientCode,
-                    IsFixedLength = false,
-                    IsAnsi = true,
-                    Length = 20,
-                },
-                updateClient.ClientStatusId,
-                modifyByID = modifyById,
-            }
-        );
-    }
-
     public async Task<PagedList<User>> GetUsers(
         int clientId,
         string keyword,
@@ -668,19 +480,6 @@ public class LocatorRepository(IDbConnection locatorDb)
                 },
             }
         );
-    }
-
-    public async Task<List<KeyValuePair<int, string>>> GetClientList()
-    {
-        return (
-            await locatorDb.QueryAsync<KeyValuePair<int, string>>(
-                @$"
-                select
-                    ClientID {nameof(KeyValuePair<int, string>.Key)},
-                    ClientName {nameof(KeyValuePair<int, string>.Value)}
-                from dbo.Client"
-            )
-        ).ToList();
     }
 
     public async Task<List<KeyValuePair<int, string>>> GetRoleList()
@@ -852,19 +651,6 @@ public class LocatorRepository(IDbConnection locatorDb)
             where
                 UserID = @UserID",
             new { userId }
-        );
-    }
-
-    public async Task<string> GetClientCode(int clientId)
-    {
-        return await locatorDb.QuerySingleAsync<string>(
-            @$"
-            select
-                ClientCode {nameof(Client.ClientCode)}
-            from dbo.Client
-            where
-                ClientID = @ClientID",
-            new { clientId }
         );
     }
 

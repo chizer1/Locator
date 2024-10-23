@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using Locator.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Locator.Services;
 
-public class Auth0Service(string auth0Url, string auth0ClientId, string auth0ClientSecret)
+internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0ClientSecret)
 {
     public async Task<string> GetAccessToken()
     {

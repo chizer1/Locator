@@ -2,9 +2,9 @@ using System.Data;
 using Dapper;
 using Locator.Models;
 
-namespace Library.Repositories;
+namespace Locator.Repositories;
 
-public class ClientRepository(IDbConnection locatorDb)
+internal class ClientRepository(IDbConnection locatorDb)
 {
     public async Task<int> AddClient(string clientName, string clientCode, int createById)
     {
@@ -33,31 +33,6 @@ public class ClientRepository(IDbConnection locatorDb)
                 clientCode,
                 clientName,
                 createById,
-            }
-        );
-    }
-
-    public async Task<Client> GetClient(string clientCode)
-    {
-        return await locatorDb.QuerySingleAsync<Client>(
-            @$"
-            select
-                ClientID {nameof(Client.ClientId)},
-                ClientCode {nameof(Client.ClientCode)},
-                ClientName {nameof(Client.ClientName)},
-                ClientStatusID {nameof(Client.ClientStatusId)}
-            from dbo.Client 
-            where
-                ClientCode = @ClientCode",
-            new
-            {
-                ClientCode = new DbString
-                {
-                    Value = clientCode,
-                    IsFixedLength = false,
-                    IsAnsi = true,
-                    Length = 20,
-                },
             }
         );
     }
@@ -149,7 +124,7 @@ public class ClientRepository(IDbConnection locatorDb)
                 ClientCode = @ClientCode,
                 ClientStatusID = @ClientStatusID,
                 ModifyByID = @ModifyByID,
-                ModifyDate = getdate()
+                ModifyDate = getutcdate()
             where
                 ClientID = @ClientID",
             new
@@ -160,6 +135,14 @@ public class ClientRepository(IDbConnection locatorDb)
                 clientStatusId,
                 modifyById,
             }
+        );
+    }
+
+    public async Task DeleteClient(int clientId)
+    {
+        await locatorDb.ExecuteAsync(
+            "delete from dbo.Client where ClientID = @ClientID",
+            new { clientId }
         );
     }
 }

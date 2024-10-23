@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Locator.Models;
 using Locator.Repositories;
-using Microsoft.AspNetCore.Http;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Locator.Services;
 
-public partial class LocatorService
+internal partial class LocatorService
 {
     private readonly LocatorRepository _locatorRepo;
     private readonly Auth0Service _auth0Service;
@@ -22,19 +18,15 @@ public partial class LocatorService
     private readonly string _auth0Id;
     private readonly int _userId;
     private readonly IFusionCache _cache;
-    private readonly ValidationHelper _validationHelper;
 
     public LocatorService(
         IHttpContextAccessor httpContextAccessor,
         IFusionCache cache,
         Auth0Service auth0Service,
-        LocatorRepository locatorRepo,
-        AuthenticationHelper authenticationHelper,
-        ValidationHelper validationHelper
+        LocatorRepository locatorRepo
     )
     {
-        if (authenticationHelper.Auth0Id(httpContextAccessor.HttpContext) is not { } auth0Id)
-            return;
+        string auth0Id = httpContextAccessor.HttpContext.User.FindFirst("sub").Value;
         var connection = cache.GetOrSet(
             $"ClientDb:{auth0Id}",
             locatorRepo.GetConnection(auth0Id, (int)DatabaseType.Client),
@@ -55,7 +47,6 @@ public partial class LocatorService
             Database={connection.DatabaseName};"
         );
         _cache = cache;
-        _validationHelper = validationHelper;
     }
 
     public string Auth0Id()
@@ -88,48 +79,48 @@ public partial class LocatorService
         return _locatorRepo.GetUserStatus(auth0Id);
     }
 
-    public Connection GetConnection(string auth0Id, int databaseTypeId)
-    {
-        var clientStatus = GetClientStatus(auth0Id);
-        var userStatus = GetUserStatus(auth0Id);
+    // public Connection GetConnection(string auth0Id, int databaseTypeId)
+    // {
+    //     var clientStatus = GetClientStatus(auth0Id);
+    //     var userStatus = GetUserStatus(auth0Id);
 
-        if (clientStatus == ClientStatus.Active && userStatus == UserStatus.Active)
-            return _locatorRepo.GetConnection(auth0Id, databaseTypeId);
-        else
-            throw new ValidationException("unauthorized");
-    }
+    //     if (clientStatus == ClientStatus.Active && userStatus == UserStatus.Active)
+    //         return _locatorRepo.GetConnection(auth0Id, databaseTypeId);
+    //     else
+    //         throw new ValidationException("unauthorized");
+    // }
 
-    public async Task<Client> GetClient(string clientCode)
-    {
-        return await _locatorRepo.GetClient(clientCode);
-    }
+    // public async Task<Client> GetClient(string clientCode)
+    // {
+    //     return await _locatorRepo.GetClient(clientCode);
+    // }
 
-    public async Task<PagedList<Client>> GetClients(string keyword, int pageNumber, int pageSize)
-    {
-        return await _locatorRepo.GetClients(keyword, pageNumber, pageSize);
-    }
+    // public async Task<PagedList<Client>> GetClients(string keyword, int pageNumber, int pageSize)
+    // {
+    //     return await _locatorRepo.GetClients(keyword, pageNumber, pageSize);
+    // }
 
-    public async Task<List<KeyValuePair<int, string>>> GetClientList()
-    {
-        return await _locatorRepo.GetClientList();
-    }
+    // public async Task<List<KeyValuePair<int, string>>> GetClientList()
+    // {
+    //     return await _locatorRepo.GetClientList();
+    // }
 
-    public async Task<Client> UpdateClient(UpdateClient updateClient)
-    {
-        await _locatorRepo.UpdateClient(updateClient, UserId());
+    // public async Task<Client> UpdateClient(UpdateClient updateClient)
+    // {
+    //     await _locatorRepo.UpdateClient(updateClient, UserId());
 
-        var auth0IDs = await _locatorRepo.GetAuth0Ids(updateClient.ClientCode);
+    //     var auth0IDs = await _locatorRepo.GetAuth0Ids(updateClient.ClientCode);
 
-        foreach (var auth0Id in auth0IDs)
-            await _cache.RemoveAsync($"ClientDb:{auth0Id}");
+    //     foreach (var auth0Id in auth0IDs)
+    //         await _cache.RemoveAsync($"ClientDb:{auth0Id}");
 
-        return await GetClient(updateClient.ClientCode);
-    }
+    //     return await GetClient(updateClient.ClientCode);
+    // }
 
-    public async Task<bool> IsClientActive(string clientCode)
-    {
-        return await _locatorRepo.IsClientActive(clientCode);
-    }
+    // public async Task<bool> IsClientActive(string clientCode)
+    // {
+    //     return await _locatorRepo.IsClientActive(clientCode);
+    // }
 
     // public async Task<Client> AddClient(AddClient addClient)
     // {
@@ -158,10 +149,10 @@ public partial class LocatorService
     //     return client;
     // }
 
-    private ClientStatus GetClientStatus(string auth0Id)
-    {
-        return _locatorRepo.GetClientStatus(auth0Id);
-    }
+    // private ClientStatus GetClientStatus(string auth0Id)
+    // {
+    //     return _locatorRepo.GetClientStatus(auth0Id);
+    // }
 
     public async Task<ClientUser> GetClientUser(string auth0Id)
     {
@@ -188,33 +179,33 @@ public partial class LocatorService
         return await _locatorRepo.GetUsers(clientId, search, pageNumber, pageSize);
     }
 
-    public async Task<User> AddUser(AddUser addUser)
-    {
-        if (!_validationHelper.IsValidEmail(addUser.EmailAddress))
-            throw new ValidationException("Invalid email address");
+    // public async Task<User> AddUser(AddUser addUser)
+    // {
+    //     if (!_validationHelper.IsValidEmail(addUser.EmailAddress))
+    //         throw new ValidationException("Invalid email address");
 
-        if (await _locatorRepo.CheckEmailExists(addUser.EmailAddress))
-            throw new ValidationException("Email is already taken");
+    //     if (await _locatorRepo.CheckEmailExists(addUser.EmailAddress))
+    //         throw new ValidationException("Email is already taken");
 
-        var clientCode = await GetClientCode(addUser.ClientId);
+    //     var clientCode = await GetClientCode(addUser.ClientId);
 
-        var accessToken = await _auth0Service.GetAccessToken();
-        var auth0Id = await _auth0Service.CreateUser(
-            accessToken,
-            addUser.EmailAddress,
-            addUser.FirstName,
-            addUser.LastName,
-            clientCode
-        );
+    //     var accessToken = await _auth0Service.GetAccessToken();
+    //     var auth0Id = await _auth0Service.CreateUser(
+    //         accessToken,
+    //         addUser.EmailAddress,
+    //         addUser.FirstName,
+    //         addUser.LastName,
+    //         clientCode
+    //     );
 
-        var allRoles = await _locatorRepo.GetRoles();
+    //     var allRoles = await _locatorRepo.GetRoles();
 
-        var userRoles = allRoles.Where(x => addUser.RoleIds.Contains(x.RoleId)).ToList();
-        foreach (var role in userRoles)
-            await _auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
+    //     var userRoles = allRoles.Where(x => addUser.RoleIds.Contains(x.RoleId)).ToList();
+    //     foreach (var role in userRoles)
+    //         await _auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
 
-        return await _locatorRepo.AddUser(addUser, auth0Id, UserId());
-    }
+    //     return await _locatorRepo.AddUser(addUser, auth0Id, UserId());
+    // }
 
     public async Task<List<KeyValuePair<int, string>>> GetRoleList()
     {
@@ -232,9 +223,6 @@ public partial class LocatorService
 
     public async Task<User> UpdateProfile(UpdateProfile updateProfile, string auth0Id)
     {
-        if (!_validationHelper.IsValidEmail(updateProfile.EmailAddress))
-            throw new ValidationException("Invalid email address");
-
         var currentEmail = await GetUserEmail(UserId());
         if (currentEmail != updateProfile.EmailAddress)
         {
@@ -257,9 +245,6 @@ public partial class LocatorService
 
     public async Task<User> UpdateUser(UpdateUser updateUser)
     {
-        if (!_validationHelper.IsValidEmail(updateUser.EmailAddress))
-            throw new ValidationException("Invalid email address");
-
         var currentEmail = await GetUserEmail(updateUser.UserId);
         if (currentEmail != updateUser.EmailAddress)
         {
@@ -336,10 +321,10 @@ public partial class LocatorService
         return await _locatorRepo.GetDatabases(clientCode);
     }
 
-    private async Task<string> GetClientCode(int clientId)
-    {
-        return await _locatorRepo.GetClientCode(clientId);
-    }
+    // private async Task<string> GetClientCode(int clientId)
+    // {
+    //     return await _locatorRepo.GetClientCode(clientId);
+    // }
 
     private async Task<string> GetUserEmail(int userId)
     {
