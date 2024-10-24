@@ -5,17 +5,23 @@ using Locator.Services;
 
 namespace Locator;
 
-public class LocatorX()
+public class LocatorLib()
 {
     readonly ClientRepository _clientRepository;
     readonly ClientService _clientService;
+    readonly Auth0Service _auth0Service;
 
-    // will also need to init auth0 credentials here
-    public LocatorX(IDbConnection locatorDb)
+    public LocatorLib(
+        IDbConnection locatorDb,
+        string auth0Url,
+        string auth0ClientId,
+        string auth0ClientSecret
+    )
         : this()
     {
         _clientRepository = new(locatorDb);
         _clientService = new(_clientRepository);
+        _auth0Service = new(auth0Url, auth0ClientId, auth0ClientSecret);
     }
 
     public async Task<int> AddClient(string clientName, string clientCode, int createById)
@@ -46,7 +52,13 @@ public class LocatorX()
         int modifyById
     )
     {
-        await _clientService.UpdateClient(clientId, clientName, clientCode, clientStatusId, modifyById);
+        await _clientService.UpdateClient(
+            clientId,
+            clientName,
+            clientCode,
+            clientStatusId,
+            modifyById
+        );
     }
 
     public async Task DeleteClient(int clientId)

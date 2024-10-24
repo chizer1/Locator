@@ -1,6 +1,6 @@
-ALTER TABLE [dbo].[Role] ADD CONSTRAINT [DEF_Role_CreateDate] DEFAULT (getdate()) FOR [CreateDate]
+ALTER TABLE [dbo].[Role] ADD CONSTRAINT [DEF_Role_CreateDate] DEFAULT (getutcdate()) FOR [CreateDate]
 GO
-ALTER TABLE [dbo].[Role] ADD CONSTRAINT [DEF_Role_ModifyDate] DEFAULT (getdate()) FOR [ModifyDate]
+ALTER TABLE [dbo].[Role] ADD CONSTRAINT [DEF_Role_ModifyDate] DEFAULT (getutcdate()) FOR [ModifyDate]
 GO
 ALTER TABLE [dbo].[Role] ADD CONSTRAINT [DEF_Role_RowGuid] DEFAULT (newid()) FOR [RowGuid]
 GO
