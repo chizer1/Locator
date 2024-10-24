@@ -2,6 +2,8 @@ namespace Locator.Models;
 
 public class DatabaseServer
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
+    public string DatabaseServerId { get; set; }
+    public string DatabaseServerName { get; set; }
+    public string DatabaseServerIpAddress { get; set; }
+    public List<Database> Databases { get; set; }
 }

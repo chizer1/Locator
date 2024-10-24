@@ -192,21 +192,21 @@ internal class LocatorRepository(IDbConnection locatorDb)
     //     return (List<Database>)
     //         await locatorDb.QueryAsync<Database>(
     //             @$"
-    //             select 
+    //             select
     //                 d.[DatabaseName] {nameof(Database.DatabaseName)},
     //                 dt.DatabaseTypeName {nameof(Database.DatabaseType)},
     //                 ds.DatabaseServerName {nameof(Database.DatabaseServer)},
     //                 d.IsActive {nameof(Database.IsActive)}
-    //             from ClientConnection cc 
+    //             from ClientConnection cc
     //             inner join [Database] d
     //                 on d.DatabaseID = cc.DatabaseID
-    //             inner join DatabaseType dt  
+    //             inner join DatabaseType dt
     //                 on d.DatabaseTypeID = dt.DatabaseTypeID
-    //             inner join DatabaseServer ds  
+    //             inner join DatabaseServer ds
     //                 on d.DatabaseServerID = ds.DatabaseServerID
-    //             where 
+    //             where
     //                 ClientID = (
-    //                     select 
+    //                     select
     //                         ClientID
     //                     from Client
     //                     where

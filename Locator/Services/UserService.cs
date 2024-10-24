@@ -19,20 +19,20 @@ internal class UserService(
         int createById
     )
     {
-        var accessToken = await auth0Service.GetAccessToken();
-        var auth0Id = await auth0Service.CreateUser(
-            accessToken,
-            emailAddress,
-            firstName,
-            lastName,
-            clientId.ToString()
-        );
+        // var accessToken = await auth0Service.GetAccessToken();
+        // var auth0Id = await auth0Service.CreateUser(
+        //     accessToken,
+        //     emailAddress,
+        //     firstName,
+        //     lastName,
+        //     clientId.ToString()
+        // );
 
-        var allRoles = await roleRepository.GetRoles();
+        // var allRoles = await roleRepository.GetRoles();
 
-        var userRoles = allRoles.Where(x => roleIds.Contains(x.RoleId)).ToList();
-        foreach (var role in userRoles)
-            await auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
+        // var userRoles = allRoles.Where(x => roleIds.Contains(x.RoleId)).ToList();
+        // foreach (var role in userRoles)
+        //     await auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
 
         return await userRepository.AddUser(
             firstName,
@@ -41,7 +41,7 @@ internal class UserService(
             roleIds,
             userStatusId,
             clientId,
-            auth0Id,
+            Guid.NewGuid().ToString(),
             createById
         );
     }
