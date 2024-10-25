@@ -6,36 +6,23 @@ namespace Locator.Repositories;
 
 internal class DatabaseRepository(IDbConnection locatorDb)
 {
-    public async Task<int> AddDatabaseServer(
-        string databaseServerName,
-        string ipAddress,
-        int userId
-    )
+    public async Task<int> AddDatabaseServer(string databaseServerName, string ipAddress)
     {
         return await locatorDb.QuerySingleAsync<int>(
             @$"
             insert into dbo.DatabaseServer
             (
                 DatabaseServerName,
-                IPAddress,
-                CreateByID,
-                ModifyByID
+                DatabaseServerIPAddress
             )
             values
             (
                 @DatabaseServerName,
-                @IPAddress,
-                @UserID,
-                @UserID
+                @IPAddress
             )
 
             select scope_identity()",
-            new
-            {
-                databaseServerName,
-                ipAddress,
-                userId,
-            }
+            new { databaseServerName, ipAddress }
         );
     }
 
@@ -45,7 +32,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
         string databaseUserPassword,
         int databaseServerId,
         int databaseTypeId,
-        int userId
+        DatabaseStatus databaseStatus
     )
     {
         return await locatorDb.QuerySingleAsync<int>(
@@ -57,8 +44,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 DatabaseUserPassword,
                 DatabaseServerID,
                 DatabaseTypeID,
-                CreateByID,
-                ModifyByID
+                DatabaseStatusID
             )
             values
             (
@@ -67,8 +53,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 @DatabaseUserPassword,
                 @DatabaseServerID,
                 @DatabaseTypeID,
-                @UserID,
-                @UserID
+                @DatabaseStatusID
             )
 
             select scope_identity()",
@@ -79,30 +64,26 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
-                userId,
+                DatabaseStatusID = (int)databaseStatus,
             }
         );
     }
 
-    public async Task<int> AddDatabaseType(string databaseTypeName, int userId)
+    public async Task<int> AddDatabaseType(string databaseTypeName)
     {
         return await locatorDb.QuerySingleAsync<int>(
             @$"
             insert into dbo.DatabaseType
             (
-                DatabaseTypeName,
-                CreateByID,
-                ModifyByID
+                DatabaseTypeName
             )
             values
             (
-                @DatabaseTypeName,
-                @UserID,
-                @UserID
+                @DatabaseTypeName
             )
 
             select scope_identity()",
-            new { databaseTypeName, userId }
+            new { databaseTypeName }
         );
     }
 
@@ -118,22 +99,16 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             );
     }
 
-    public async Task UpdateDatabaseType(int databaseTypeId, string databaseTypeName, int userId)
+    public async Task UpdateDatabaseType(int databaseTypeId, string databaseTypeName)
     {
         await locatorDb.ExecuteAsync(
             @$"
             update dbo.DatabaseType
             set
-                DatabaseTypeName = @DatabaseTypeName,
-                ModifyByID = @UserID
+                DatabaseTypeName = @DatabaseTypeName
             where
                 DatabaseTypeID = @DatabaseTypeID",
-            new
-            {
-                databaseTypeId,
-                databaseTypeName,
-                userId,
-            }
+            new { databaseTypeId, databaseTypeName }
         );
     }
 
@@ -178,7 +153,6 @@ internal class DatabaseRepository(IDbConnection locatorDb)
         return results.ToList();
     }
 
-    // get databases
     public async Task<List<Database>> GetDatabases()
     {
         return (List<Database>)

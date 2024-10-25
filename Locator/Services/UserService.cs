@@ -14,9 +14,8 @@ internal class UserService(
         string lastName,
         string emailAddress,
         int[] roleIds,
-        int userStatusId,
-        int clientId,
-        int createById
+        UserStatus userStatus,
+        int clientId
     )
     {
         // var accessToken = await auth0Service.GetAccessToken();
@@ -39,10 +38,9 @@ internal class UserService(
             lastName,
             emailAddress,
             roleIds,
-            userStatusId,
+            userStatus,
             clientId,
-            Guid.NewGuid().ToString(),
-            createById
+            "auth0Id"
         );
     }
 
@@ -84,10 +82,9 @@ internal class UserService(
         string firstName,
         string lastName,
         string emailAddress,
-        int userStatusId,
+        UserStatus userStatus,
         int[] roleIds,
-        int clientId,
-        int modifyById
+        int clientId
     )
     {
         // var currentEmail = await GetUserEmail(updateUser.UserId);
@@ -105,7 +102,7 @@ internal class UserService(
             firstName,
             lastName,
             emailAddress,
-            userStatusId != (int)UserStatus.Active
+            true
         );
 
         var roles = await roleRepository.GetRoles();
@@ -121,10 +118,9 @@ internal class UserService(
             firstName,
             lastName,
             emailAddress,
-            userStatusId,
+            userStatus,
             clientId,
-            roleIds,
-            modifyById
+            roleIds
         );
     }
 

@@ -11,10 +11,9 @@ internal class UserRepository(IDbConnection locatorDb)
         string lastName,
         string emailAddress,
         int[] roleIds,
-        int userStatusId,
+        UserStatus userStatus,
         int clientId,
-        string auth0Id,
-        int createById
+        string auth0Id
     )
     {
         var userId = await locatorDb.QuerySingleAsync<int>(
@@ -26,9 +25,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 LastName,
                 EmailAddress,
                 UserStatusID,
-                Auth0ID,
-                CreateByID,
-                ModifyByID
+                Auth0ID
             )
             values
             (
@@ -37,9 +34,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 @LastName,
                 @EmailAddress,
                 @UserStatusID,
-                @Auth0ID,
-                @CreateByID,
-                @CreateByID
+                @Auth0ID
             )
 
             select scope_identity() as UserId",
@@ -49,9 +44,8 @@ internal class UserRepository(IDbConnection locatorDb)
                 firstName,
                 lastName,
                 emailAddress,
-                userStatusId,
+                UserStatusID = (int)userStatus,
                 auth0Id,
-                createById,
             }
         );
 
@@ -62,23 +56,14 @@ internal class UserRepository(IDbConnection locatorDb)
                 insert into dbo.UserRole
                 (
                     UserID,
-                    RoleID,
-                    CreateByID,
-                    ModifyByID
+                    RoleID
                 )
                 values
                 (
                     @UserID,
-                    @RoleID,
-                    @CreateByID,
-                    @CreateByID
+                    @RoleID
                 )",
-                new
-                {
-                    userId,
-                    roleId,
-                    createById,
-                }
+                new { userId, roleId }
             );
         }
 
@@ -224,10 +209,9 @@ internal class UserRepository(IDbConnection locatorDb)
         string firstName,
         string lastName,
         string emailAddress,
-        int userStatusId,
+        UserStatus userStatus,
         int clientId,
-        int[] roleIds,
-        int modifyById
+        int[] roleIds
     )
     {
         await locatorDb.ExecuteAsync(
@@ -238,9 +222,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 LastName = @LastName,
                 EmailAddress = @EmailAddress,
                 UserStatusID = @UserStatusID,
-                ClientID = @ClientID,
-                ModifyByID = @ModifyByID,
-                ModifyDate = getutcdate()
+                ClientID = @ClientID
             where
                 UserID = @UserID",
             new
@@ -249,9 +231,8 @@ internal class UserRepository(IDbConnection locatorDb)
                 firstName,
                 lastName,
                 emailAddress,
-                userStatusId,
+                userStatusID = (int)userStatus,
                 clientId,
-                modifyById,
             }
         );
 
@@ -270,23 +251,14 @@ internal class UserRepository(IDbConnection locatorDb)
                 insert into dbo.UserRole
                 (
                     UserID,
-                    RoleID,
-                    CreateByID,
-                    ModifyByID
+                    RoleID
                 )
                 values
                 (
                     @UserID,
-                    @RoleID,
-                    @ModifyByID,
-                    @ModifyByID
+                    @RoleID
                 )",
-                new
-                {
-                    userId,
-                    roleId,
-                    modifyById,
-                }
+                new { userId, roleId }
             );
         }
     }

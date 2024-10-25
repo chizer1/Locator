@@ -6,7 +6,11 @@ namespace Locator.Repositories;
 
 internal class ClientRepository(IDbConnection locatorDb)
 {
-    public async Task<int> AddClient(string clientName, string clientCode, int createById)
+    public async Task<int> AddClient(
+        string clientName,
+        string clientCode,
+        ClientStatus clientStatus
+    )
     {
         return await locatorDb.QuerySingleAsync<int>(
             @$"
@@ -14,17 +18,13 @@ internal class ClientRepository(IDbConnection locatorDb)
             (
                 ClientCode,
                 ClientName, 
-                ClientStatusID,
-                CreateByID,
-                ModifyByID
+                ClientStatusID
             )
             values 
             (
                 @ClientCode,
                 @ClientName,
-                1,
-                @CreateByID,
-                @CreateByID
+                @ClientStatusID,
             )
 
             select scope_identity()",
@@ -32,7 +32,7 @@ internal class ClientRepository(IDbConnection locatorDb)
             {
                 clientCode,
                 clientName,
-                createById,
+                ClientStatusID = (int)clientStatus,
             }
         );
     }
@@ -58,14 +58,14 @@ internal class ClientRepository(IDbConnection locatorDb)
         return (
             await locatorDb.QueryAsync<Client>(
                 @$"
-            select
-                ClientID {nameof(Client.ClientId)},
-                ClientCode {nameof(Client.ClientCode)},
-                ClientName {nameof(Client.ClientName)},
-                ClientStatusID {nameof(Client.ClientStatusId)}
-            from dbo.Client
-            order by
-                ClientName asc"
+                select
+                    ClientID {nameof(Client.ClientId)},
+                    ClientCode {nameof(Client.ClientCode)},
+                    ClientName {nameof(Client.ClientName)},
+                    ClientStatusID {nameof(Client.ClientStatusId)}
+                from dbo.Client
+                order by
+                    ClientName asc"
             )
         ).ToList();
     }
@@ -112,8 +112,7 @@ internal class ClientRepository(IDbConnection locatorDb)
         int clientId,
         string clientName,
         string clientCode,
-        int clientStatusId,
-        int modifyById
+        ClientStatus clientStatus
     )
     {
         await locatorDb.ExecuteAsync(
@@ -122,9 +121,7 @@ internal class ClientRepository(IDbConnection locatorDb)
             set
                 ClientName = @ClientName,
                 ClientCode = @ClientCode,
-                ClientStatusID = @ClientStatusID,
-                ModifyByID = @ModifyByID,
-                ModifyDate = getutcdate()
+                ClientStatusID = @ClientStatusID
             where
                 ClientID = @ClientID",
             new
@@ -132,8 +129,7 @@ internal class ClientRepository(IDbConnection locatorDb)
                 clientId,
                 clientName,
                 clientCode,
-                clientStatusId,
-                modifyById,
+                ClientStatusID = (int)clientStatus,
             }
         );
     }

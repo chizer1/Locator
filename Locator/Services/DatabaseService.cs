@@ -5,15 +5,9 @@ namespace Locator.Services;
 
 internal class DatabaseService(DatabaseRepository databaseRepository)
 {
-    // copy all methods from repo
-
-    public async Task<int> AddDatabaseServer(
-        string databaseServerName,
-        string ipAddress,
-        int userId
-    )
+    public async Task<int> AddDatabaseServer(string databaseServerName, string ipAddress)
     {
-        return await databaseRepository.AddDatabaseServer(databaseServerName, ipAddress, userId);
+        return await databaseRepository.AddDatabaseServer(databaseServerName, ipAddress);
     }
 
     public async Task<int> AddDatabase(
@@ -22,7 +16,7 @@ internal class DatabaseService(DatabaseRepository databaseRepository)
         string databaseUserPassword,
         int databaseServerId,
         int databaseTypeId,
-        int userId
+        DatabaseStatus databaseStatus
     )
     {
         return await databaseRepository.AddDatabase(
@@ -31,13 +25,13 @@ internal class DatabaseService(DatabaseRepository databaseRepository)
             databaseUserPassword,
             databaseServerId,
             databaseTypeId,
-            userId
+            databaseStatus
         );
     }
 
-    public async Task<int> AddDatabaseType(string databaseTypeName, int userId)
+    public async Task<int> AddDatabaseType(string databaseTypeName)
     {
-        return await databaseRepository.AddDatabaseType(databaseTypeName, userId);
+        return await databaseRepository.AddDatabaseType(databaseTypeName);
     }
 
     public async Task<List<DatabaseType>> GetDatabaseTypes()
@@ -50,13 +44,9 @@ internal class DatabaseService(DatabaseRepository databaseRepository)
     //     return await databaseRepository.GetDatabaseType(databaseTypeId);
     // }
 
-    public async Task UpdateDatabaseType(
-        int databaseTypeId,
-        string databaseTypeName,
-        int modifyById
-    )
+    public async Task UpdateDatabaseType(int databaseTypeId, string databaseTypeName)
     {
-        await databaseRepository.UpdateDatabaseType(databaseTypeId, databaseTypeName, modifyById);
+        await databaseRepository.UpdateDatabaseType(databaseTypeId, databaseTypeName);
     }
 
     // public async Task DeleteDatabaseType(int databaseTypeId)

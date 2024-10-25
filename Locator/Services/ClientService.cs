@@ -5,9 +5,13 @@ namespace Locator.Services;
 
 internal class ClientService(ClientRepository clientRepository)
 {
-    public async Task<int> AddClient(string clientName, string clientCode, int createById)
+    public async Task<int> AddClient(
+        string clientName,
+        string clientCode,
+        ClientStatus clientStatus
+    )
     {
-        return await clientRepository.AddClient(clientName, clientCode, createById);
+        return await clientRepository.AddClient(clientName, clientCode, clientStatus);
     }
 
     public async Task<Client> GetClient(int clientId)
@@ -29,17 +33,10 @@ internal class ClientService(ClientRepository clientRepository)
         int clientId,
         string clientName,
         string clientCode,
-        int clientStatusId,
-        int modifyById
+        ClientStatus clientStatus
     )
     {
-        await clientRepository.UpdateClient(
-            clientId,
-            clientName,
-            clientCode,
-            clientStatusId,
-            modifyById
-        );
+        await clientRepository.UpdateClient(clientId, clientName, clientCode, clientStatus);
     }
 
     public async Task DeleteClient(int clientId)

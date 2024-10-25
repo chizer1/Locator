@@ -14,7 +14,6 @@ LocatorLib locator =
         "RCbDL6LnErLJfuXz1s3hvLf6bVJklNFl"
     );
 
-
 // get users
 var users = await locator.GetUsers();
 

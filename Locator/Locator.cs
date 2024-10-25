@@ -37,9 +37,13 @@ public class LocatorLib()
 
     #region Client
 
-    public async Task<int> AddClient(string clientName, string clientCode, int createById)
+    public async Task<int> AddClient(
+        string clientName,
+        string clientCode,
+        ClientStatus clientStatus
+    )
     {
-        return await _clientService.AddClient(clientName, clientCode, createById);
+        return await _clientRepository.AddClient(clientName, clientCode, clientStatus);
     }
 
     public async Task<List<Client>> GetClients()
@@ -61,17 +65,10 @@ public class LocatorLib()
         int clientId,
         string clientName,
         string clientCode,
-        int clientStatusId,
-        int modifyById
+        ClientStatus clientStatus
     )
     {
-        await _clientService.UpdateClient(
-            clientId,
-            clientName,
-            clientCode,
-            clientStatusId,
-            modifyById
-        );
+        await _clientService.UpdateClient(clientId, clientName, clientCode, clientStatus);
     }
 
     public async Task DeleteClient(int clientId)
@@ -88,9 +85,8 @@ public class LocatorLib()
         string lastName,
         string emailAddress,
         int[] roleIds,
-        int userStatusId,
-        int clientId,
-        int createById
+        UserStatus userStatus,
+        int clientId
     )
     {
         return await _userService.AddUser(
@@ -98,9 +94,8 @@ public class LocatorLib()
             lastName,
             emailAddress,
             roleIds,
-            userStatusId,
-            clientId,
-            createById
+            userStatus,
+            clientId
         );
     }
 
@@ -116,22 +111,14 @@ public class LocatorLib()
 
     // add database method
 
-    public Task<int> AddDatabaseServer(
-        string databaseServerName,
-        string databaseServerIpAddress,
-        int userId
-    )
+    public Task<int> AddDatabaseServer(string databaseServerName, string databaseServerIpAddress)
     {
-        return _databaseService.AddDatabaseServer(
-            databaseServerName,
-            databaseServerIpAddress,
-            userId
-        );
+        return _databaseService.AddDatabaseServer(databaseServerName, databaseServerIpAddress);
     }
 
-    public Task<int> AddDatabaseType(string databaseTypeName, int userId)
+    public Task<int> AddDatabaseType(string databaseTypeName)
     {
-        return _databaseService.AddDatabaseType(databaseTypeName, userId);
+        return _databaseService.AddDatabaseType(databaseTypeName);
     }
 
     public Task<int> AddDatabase(
@@ -140,7 +127,7 @@ public class LocatorLib()
         string databaseUserPassword,
         int databaseServerId,
         int databaseTypeId,
-        int userId
+        DatabaseStatus databaseStatus
     )
     {
         return _databaseService.AddDatabase(
@@ -149,7 +136,7 @@ public class LocatorLib()
             databaseUserPassword,
             databaseServerId,
             databaseTypeId,
-            userId
+            databaseStatus
         );
     }
 
