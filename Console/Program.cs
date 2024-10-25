@@ -14,7 +14,12 @@ LocatorLib locator =
         "RCbDL6LnErLJfuXz1s3hvLf6bVJklNFl"
     );
 
-// create user
-var userId = await locator.AddUser("Jane", "Doe", "jane.doe@bosilovatz.com", [], 1, 1003, 1);
 
-Console.WriteLine($"User ID: {userId}");
+// get users
+var users = await locator.GetUsers();
+
+// loop users
+foreach (var user in users)
+{
+    Console.WriteLine($"{user.FirstName} {user.LastName}");
+}
