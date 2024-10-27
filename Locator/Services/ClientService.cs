@@ -43,4 +43,13 @@ internal class ClientService(ClientRepository clientRepository)
     {
         await clientRepository.DeleteClient(clientId);
     }
+
+    // add client database
+    public async Task<int> AddClientDatabase(
+        int clientId,
+        int databaseId
+    )
+    {
+        return await clientRepository.AddClientDatabase(clientId, databaseId);
+    }
 }

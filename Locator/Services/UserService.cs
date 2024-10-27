@@ -13,9 +13,8 @@ internal class UserService(
         string firstName,
         string lastName,
         string emailAddress,
-        int[] roleIds,
-        UserStatus userStatus,
-        int clientId
+        List<Role> roles,
+        UserStatus userStatus
     )
     {
         // var accessToken = await auth0Service.GetAccessToken();
@@ -37,10 +36,8 @@ internal class UserService(
             firstName,
             lastName,
             emailAddress,
-            roleIds,
             userStatus,
-            clientId,
-            "auth0Id"
+            Guid.NewGuid().ToString()
         );
     }
 

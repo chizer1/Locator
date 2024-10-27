@@ -92,4 +92,25 @@ internal class RoleRepository(IDbConnection locatorDb)
             new { roleId }
         );
     }
+
+    // add user role
+    public async Task<int> AddUserRole(int userId, int roleId)
+    {
+        return await locatorDb.QuerySingleAsync<int>(
+            @$"
+            insert into dbo.UserRole
+            (
+                UserID,
+                RoleID
+            )
+            values
+            (
+                @UserID,
+                @RoleID
+            )
+            
+            select scope_identity()",
+            new { userId, roleId }
+        );
+    }
 }

@@ -10,9 +10,7 @@ internal class UserRepository(IDbConnection locatorDb)
         string firstName,
         string lastName,
         string emailAddress,
-        int[] roleIds,
         UserStatus userStatus,
-        int clientId,
         string auth0Id
     )
     {
@@ -20,7 +18,6 @@ internal class UserRepository(IDbConnection locatorDb)
             @$"
             insert into dbo.[User]
             (
-                ClientID,
                 FirstName,
                 LastName,
                 EmailAddress,
@@ -29,7 +26,6 @@ internal class UserRepository(IDbConnection locatorDb)
             )
             values
             (
-                @ClientID,
                 @FirstName,
                 @LastName,
                 @EmailAddress,
@@ -40,7 +36,6 @@ internal class UserRepository(IDbConnection locatorDb)
             select scope_identity() as UserId",
             new
             {
-                clientId,
                 firstName,
                 lastName,
                 emailAddress,
@@ -48,24 +43,6 @@ internal class UserRepository(IDbConnection locatorDb)
                 auth0Id,
             }
         );
-
-        foreach (var roleId in roleIds)
-        {
-            await locatorDb.ExecuteAsync(
-                @$"
-                insert into dbo.UserRole
-                (
-                    UserID,
-                    RoleID
-                )
-                values
-                (
-                    @UserID,
-                    @RoleID
-                )",
-                new { userId, roleId }
-            );
-        }
 
         return userId;
     }
@@ -80,8 +57,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatusId)},
-                c.ClientID {nameof(User.ClientId)}
+                u.UserStatusID {nameof(User.UserStatus)}
             from dbo.[User] u
             inner join dbo.UserStatus us
                 on us.UserStatusID = u.UserStatusID
@@ -112,8 +88,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatusId)},
-                c.ClientID {nameof(User.ClientId)}
+                u.UserStatusID {nameof(User.UserStatus)}
             from dbo.[User] u
             inner join dbo.UserStatus us
                 on us.UserStatusID = u.UserStatusID
@@ -135,7 +110,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatusId)}
+                u.UserStatusID {nameof(User.UserStatus)}
             from dbo.[User] u
             inner join dbo.UserStatus us
                 on us.UserStatusID = u.UserStatusID
@@ -173,7 +148,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatusId)}
+                u.UserStatusID {nameof(UserStatus)}
             from dbo.[User] u
             inner join dbo.UserStatus us
                 on us.UserStatusID = u.UserStatusID

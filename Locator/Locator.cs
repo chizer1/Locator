@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.SqlClient;
 using Locator.Models;
 using Locator.Repositories;
 using Locator.Services;
@@ -7,14 +8,17 @@ namespace Locator;
 
 public class LocatorLib()
 {
-    readonly ClientRepository _clientRepository;
-    readonly UserRepository _userRepository;
-    readonly DatabaseRepository _databaseRepository;
-    readonly RoleRepository _roleRepository;
-    readonly ClientService _clientService;
-    readonly UserService _userService;
-    readonly DatabaseService _databaseService;
     readonly Auth0Service _auth0Service;
+    readonly ClientRepository _clientRepository;
+    readonly ClientService _clientService;
+    readonly UserRepository _userRepository;
+    readonly UserService _userService;
+    readonly DatabaseRepository _databaseRepository;
+    readonly DatabaseService _databaseService;
+    readonly RoleRepository _roleRepository;
+    readonly RoleService _roleService;
+    readonly ConnectionRepository _connectionRepository;
+    readonly ConnectionService _connectionService;
 
     public LocatorLib(
         IDbConnection locatorDb,
@@ -25,12 +29,15 @@ public class LocatorLib()
         : this()
     {
         _auth0Service = new(auth0Url, auth0ClientId, auth0ClientSecret);
-        _clientRepository = new(locatorDb);
-        _userRepository = new(locatorDb);
-        _roleRepository = new(locatorDb);
-        _clientService = new(_clientRepository);
 
+        _userRepository = new(locatorDb);
         _userService = new(_userRepository, new RoleRepository(locatorDb), _auth0Service);
+        _roleRepository = new(locatorDb);
+        _roleService = new(_roleRepository);
+        _clientRepository = new(locatorDb);
+        _clientService = new(_clientRepository);
+        _connectionRepository = new(locatorDb);
+        _connectionService = new(_connectionRepository);
         _databaseRepository = new(locatorDb);
         _databaseService = new(_databaseRepository);
     }
@@ -84,19 +91,11 @@ public class LocatorLib()
         string firstName,
         string lastName,
         string emailAddress,
-        int[] roleIds,
-        UserStatus userStatus,
-        int clientId
+        List<Role> roles,
+        UserStatus userStatus
     )
     {
-        return await _userService.AddUser(
-            firstName,
-            lastName,
-            emailAddress,
-            roleIds,
-            userStatus,
-            clientId
-        );
+        return await _userService.AddUser(firstName, lastName, emailAddress, roles, userStatus);
     }
 
     // get users
@@ -107,9 +106,18 @@ public class LocatorLib()
 
     #endregion
 
+    #region ClientUser
+
+    // add client user
+    public async Task<int> AddClientUser(int clientId, int userId)
+    {
+        return await _clientRepository.AddClientUser(clientId, userId);
+    }
+
+    #endregion
+
     #region Database
 
-    // add database method
 
     public Task<int> AddDatabaseServer(string databaseServerName, string databaseServerIpAddress)
     {
@@ -156,4 +164,45 @@ public class LocatorLib()
     }
 
     #endregion
+
+    #region Connection
+
+    public Task<int> AddConnection(int databaseId, int userId)
+    {
+        return _connectionService.AddConnection(databaseId, userId);
+    }
+
+    public Task<Connection> GetConnection(int connectionId)
+    {
+        return _connectionService.GetConnection(connectionId);
+    }
+
+    public Task<SqlConnection> GetConnection(string auth0Id, int clientId, int databaseTypeId)
+    {
+        return _connectionService.GetConnection(auth0Id, clientId, databaseTypeId);
+    }
+
+    #endregion
+
+    #region Role
+
+    // add role
+    public async Task<int> AddRole(string roleName, string roleDescription)
+    {
+        return await _roleService.AddRole(roleName, roleDescription);
+    }
+
+    // add user role
+    public async Task<int> AddUserRole(int userId, int roleId)
+    {
+        return await _roleRepository.AddUserRole(userId, roleId);
+    }
+
+    #endregion
+
+    // add client database
+    public async Task<int> AddClientDatabase(int clientId, int databaseId)
+    {
+        return await _clientRepository.AddClientDatabase(clientId, databaseId);
+    }
 }
