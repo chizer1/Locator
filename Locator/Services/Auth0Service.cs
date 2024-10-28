@@ -43,8 +43,7 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
         string accessToken,
         string emailAddress,
         string firstName,
-        string lastName,
-        string clientCode
+        string lastName
     )
     {
         using HttpClient client = new();
@@ -58,7 +57,7 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
             password = Guid.NewGuid().ToString(),
             verify_email = false,
             connection = "Username-Password-Authentication",
-            app_metadata = new { client_code = clientCode },
+            //app_metadata = new { client_code = clientCode },
         };
         string jsonContent = JsonConvert.SerializeObject(userMetadata);
 
@@ -73,13 +72,13 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
         using var response = await client.SendAsync(request);
         var responseString = await response.Content.ReadAsStringAsync();
 
-        string userId;
+        string auth0Id;
         if (response.IsSuccessStatusCode)
-            userId = JObject.Parse(responseString)["user_id"]?.ToString();
+            auth0Id = JObject.Parse(responseString)["user_id"]?.ToString();
         else
             throw new Exception($"Auth0 Exception. Failed to create user: {responseString}");
 
-        return userId;
+        return auth0Id;
     }
 
     public async Task UpdateUserPassword(string accessToken, string auth0Id, string password)
@@ -269,5 +268,30 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
             );
 
         return JObject.Parse(responseString)["ticket"]?.ToString();
+    }
+
+    // add auth0 role
+    public async Task<string> AddRole(string accessToken, string name, string description)
+    {
+        using HttpClient client = new();
+
+        dynamic roleData = new { name, description };
+        string jsonContent = JsonConvert.SerializeObject(roleData);
+
+        var requestUri = $"{auth0Url}api/v2/roles";
+        HttpRequestMessage request =
+            new(HttpMethod.Post, requestUri)
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
+            };
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await client.SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Auth0 Exception. Failed to add role: {responseString}");
+
+        return JObject.Parse(responseString)["id"]?.ToString();
     }
 }

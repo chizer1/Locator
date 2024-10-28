@@ -49,33 +49,45 @@ internal class UserRepository(IDbConnection locatorDb)
 
     public async Task<User> GetUser(string auth0Id)
     {
-        return await locatorDb.QuerySingleAsync<User>(
+        // get roles for user, use spliton to map to user object dapper User, Role, Connections
+        var results = await locatorDb.QueryAsync<User, Role, Connection, User>(
             @$"
-            select 
-                u.Auth0ID {nameof(User.Auth0Id)},
+            select
                 u.UserID {nameof(User.UserId)},
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatus)}
+                u.UserStatusID {nameof(User.UserStatus)},
+                u.Auth0ID {nameof(User.Auth0Id)},
+                r.RoleID {nameof(Role.RoleId)},
+                r.Auth0RoleID {nameof(Role.Auth0RoleId)},
+                r.Name {nameof(Role.Name)},
+                r.Description {nameof(Role.Description)},
+                c.ConnectionID {nameof(Connection.ConnectionId)},
+                c.DatabaseID {nameof(Connection.Database.DatabaseId)}
             from dbo.[User] u
-            inner join dbo.UserStatus us
-                on us.UserStatusID = u.UserStatusID
-            inner join dbo.Client c
-                on c.ClientID = u.ClientID
+            inner join dbo.UserRole ur
+                on ur.UserID = u.UserID
+            inner join dbo.Role r
+                on r.RoleID = ur.RoleID
+            inner join dbo.ClientUser cu
+                on cu.UserID = u.UserID
+            inner join dbo.Connection c
+                on c.ClientUserID = cu.ClientUserID
             where
                 u.Auth0ID = @Auth0ID",
-            new
+            (user, role, connection) =>
             {
-                Auth0ID = new DbString
-                {
-                    Value = auth0Id,
-                    IsFixedLength = false,
-                    IsAnsi = true,
-                    Length = 50,
-                },
-            }
+                // roles and connection
+                user.Roles.Add(role);
+                user.Connections.Add(connection);
+                return user;
+            },
+            new { auth0Id },
+            splitOn: $"{nameof(Role.RoleId)}, {nameof(Connection.ConnectionId)}"
         );
+
+        return results.FirstOrDefault();
     }
 
     public async Task<User> GetUser(int userId)
@@ -184,9 +196,7 @@ internal class UserRepository(IDbConnection locatorDb)
         string firstName,
         string lastName,
         string emailAddress,
-        UserStatus userStatus,
-        int clientId,
-        int[] roleIds
+        UserStatus userStatus
     )
     {
         await locatorDb.ExecuteAsync(
@@ -196,8 +206,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 FirstName = @FirstName,
                 LastName = @LastName,
                 EmailAddress = @EmailAddress,
-                UserStatusID = @UserStatusID,
-                ClientID = @ClientID
+                UserStatusID = @UserStatusID
             where
                 UserID = @UserID",
             new
@@ -207,35 +216,8 @@ internal class UserRepository(IDbConnection locatorDb)
                 lastName,
                 emailAddress,
                 userStatusID = (int)userStatus,
-                clientId,
             }
         );
-
-        await locatorDb.ExecuteAsync(
-            @$"
-            delete from dbo.UserRole
-            where
-                UserID = @UserID",
-            new { userId }
-        );
-
-        foreach (var roleId in roleIds)
-        {
-            await locatorDb.ExecuteAsync(
-                @$"
-                insert into dbo.UserRole
-                (
-                    UserID,
-                    RoleID
-                )
-                values
-                (
-                    @UserID,
-                    @RoleID
-                )",
-                new { userId, roleId }
-            );
-        }
     }
 
     public async Task DeleteUser(int userId)

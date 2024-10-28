@@ -90,6 +90,28 @@ internal class ConnectionRepository(IDbConnection locatorDb)
         );
     }
 
+    // get connections
+    public async Task<List<Connection>> GetConnections()
+    {
+        var results = await locatorDb.QueryAsync<Connection, Database, User, Client, Connection>(
+            @$"
+            select
+                ConnectionID {nameof(Connection.ConnectionId)},
+                DatabaseID {nameof(Connection.Database.DatabaseId)},
+                ClientID {nameof(Connection.Client.ClientId)}
+            from dbo.Connection",
+            (connection, database, user, client) =>
+            {
+                connection.Database = database;
+                connection.Client = client;
+                return connection;
+            },
+            splitOn: $"{nameof(Database.DatabaseId)}, {nameof(User.UserId)}, ${nameof(Client.ClientId)}"
+        );
+
+        return results.ToList();
+    }
+
     public async Task DeleteConnection(int connectionId)
     {
         await locatorDb.ExecuteAsync(

@@ -15,6 +15,10 @@ public class LocatorLib()
     readonly UserService _userService;
     readonly DatabaseRepository _databaseRepository;
     readonly DatabaseService _databaseService;
+    readonly DatabaseServerRepository _databaseServerRepository;
+    readonly DatabaseServerService _databaseServerService;
+    readonly DatabaseTypeRepository _databaseTypeRepository;
+    readonly DatabaseTypeService _databaseTypeService;
     readonly RoleRepository _roleRepository;
     readonly RoleService _roleService;
     readonly ConnectionRepository _connectionRepository;
@@ -33,13 +37,17 @@ public class LocatorLib()
         _userRepository = new(locatorDb);
         _userService = new(_userRepository, new RoleRepository(locatorDb), _auth0Service);
         _roleRepository = new(locatorDb);
-        _roleService = new(_roleRepository);
+        _roleService = new(_roleRepository, _auth0Service);
         _clientRepository = new(locatorDb);
         _clientService = new(_clientRepository);
         _connectionRepository = new(locatorDb);
         _connectionService = new(_connectionRepository);
         _databaseRepository = new(locatorDb);
         _databaseService = new(_databaseRepository);
+        _databaseServerRepository = new(locatorDb);
+        _databaseServerService = new(_databaseServerRepository);
+        _databaseTypeRepository = new(locatorDb);
+        _databaseTypeService = new(_databaseTypeRepository);
     }
 
     #region Client
@@ -121,12 +129,15 @@ public class LocatorLib()
 
     public Task<int> AddDatabaseServer(string databaseServerName, string databaseServerIpAddress)
     {
-        return _databaseService.AddDatabaseServer(databaseServerName, databaseServerIpAddress);
+        return _databaseServerService.AddDatabaseServer(
+            databaseServerName,
+            databaseServerIpAddress
+        );
     }
 
     public Task<int> AddDatabaseType(string databaseTypeName)
     {
-        return _databaseService.AddDatabaseType(databaseTypeName);
+        return _databaseTypeService.AddDatabaseType(databaseTypeName);
     }
 
     public Task<int> AddDatabase(
@@ -148,19 +159,30 @@ public class LocatorLib()
         );
     }
 
+    // delete database
+    public async Task DeleteDatabase(Database database)
+    {
+        await _databaseService.DeleteDatabase(database);
+    }
+
     public Task<List<DatabaseServer>> GetDatabaseServers()
     {
-        return _databaseService.GetDatabaseServers();
+        return _databaseServerService.GetDatabaseServers();
     }
 
     public Task<List<DatabaseType>> GetDatabaseTypes()
     {
-        return _databaseService.GetDatabaseTypes();
+        return _databaseTypeService.GetDatabaseTypes();
     }
 
     public Task<List<Database>> GetDatabases()
     {
         return _databaseService.GetDatabases();
+    }
+
+    public Task<Database> GetDatabase(int databaseId)
+    {
+        return _databaseService.GetDatabase(databaseId);
     }
 
     #endregion
@@ -186,23 +208,37 @@ public class LocatorLib()
 
     #region Role
 
-    // add role
     public async Task<int> AddRole(string roleName, string roleDescription)
     {
         return await _roleService.AddRole(roleName, roleDescription);
     }
 
-    // add user role
-    public async Task<int> AddUserRole(int userId, int roleId)
+    public async Task<int> AddUserRole(User user, Role role)
     {
-        return await _roleRepository.AddUserRole(userId, roleId);
+        return await _roleService.AddUserRole(user, role);
+    }
+
+    public async Task DeleteUserRole(User user, Role role)
+    {
+        await _roleService.DeleteUserRole(user, role);
     }
 
     #endregion
 
-    // add client database
     public async Task<int> AddClientDatabase(int clientId, int databaseId)
     {
         return await _clientRepository.AddClientDatabase(clientId, databaseId);
+    }
+
+    // delete user
+    public async Task DeleteUser(string auth0Id)
+    {
+        await _userService.DeleteUser(auth0Id);
+    }
+
+    // get user
+    public async Task<User> GetUser(string auth0Id)
+    {
+        return await _userService.GetUser(auth0Id);
     }
 }

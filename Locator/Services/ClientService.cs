@@ -45,10 +45,7 @@ internal class ClientService(ClientRepository clientRepository)
     }
 
     // add client database
-    public async Task<int> AddClientDatabase(
-        int clientId,
-        int databaseId
-    )
+    public async Task<int> AddClientDatabase(int clientId, int databaseId)
     {
         return await clientRepository.AddClientDatabase(clientId, databaseId);
     }

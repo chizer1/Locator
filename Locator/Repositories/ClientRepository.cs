@@ -6,7 +6,6 @@ namespace Locator.Repositories;
 
 internal class ClientRepository(IDbConnection locatorDb)
 {
-    #region Client
     public async Task<int> AddClient(
         string clientName,
         string clientCode,
@@ -142,8 +141,6 @@ internal class ClientRepository(IDbConnection locatorDb)
             new { clientId }
         );
     }
-
-    #endregion
 
     #region ClientUser
 

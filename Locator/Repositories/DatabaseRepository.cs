@@ -6,129 +6,6 @@ namespace Locator.Repositories;
 
 internal class DatabaseRepository(IDbConnection locatorDb)
 {
-    #region DatabaseServer
-
-    public async Task<int> AddDatabaseServer(string databaseServerName, string ipAddress)
-    {
-        return await locatorDb.QuerySingleAsync<int>(
-            @$"
-            insert into dbo.DatabaseServer
-            (
-                DatabaseServerName,
-                DatabaseServerIPAddress
-            )
-            values
-            (
-                @DatabaseServerName,
-                @IPAddress
-            )
-
-            select scope_identity()",
-            new { databaseServerName, ipAddress }
-        );
-    }
-
-    public async Task<DatabaseServer> GetDatabaseServer(int databaseServerId)
-    {
-        var results = await locatorDb.QueryAsync<DatabaseServer, Database, DatabaseServer>(
-            @$"
-            select
-                ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
-                ds.DatabaseServerName {nameof(DatabaseServer.DatabaseServerName)},
-                ds.IpAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
-                d.DatabaseID {nameof(Database.DatabaseId)},
-                d.DatabaseName {nameof(Database.DatabaseName)},
-                d.DatabaseServerID {nameof(Database.DatabaseServer)},
-                d.DatabaseTypeID {nameof(Database.DatabaseType)}
-            from dbo.DatabaseServer ds
-            left join dbo.[Database] d
-                on ds.DatabaseServerID = d.DatabaseServerID
-            where
-                ds.DatabaseServerID = @DatabaseServerID",
-            (ds, d) =>
-            {
-                ds.Databases ??= [];
-
-                if (d != null)
-                    ds.Databases.Add(d);
-
-                return ds;
-            },
-            new { databaseServerId },
-            splitOn: $"{nameof(Database.DatabaseId)}"
-        );
-
-        return results.FirstOrDefault();
-    }
-
-    public async Task<List<DatabaseServer>> GetDatabaseServers()
-    {
-        var results = await locatorDb.QueryAsync<DatabaseServer, Database, DatabaseServer>(
-            @$"
-            select
-                ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
-                ds.DatabaseServerName {nameof(DatabaseServer.DatabaseServerName)},
-                ds.IpAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
-                d.DatabaseID {nameof(Database.DatabaseId)},
-                d.DatabaseName {nameof(Database.DatabaseName)},
-                d.DatabaseServerID {nameof(Database.DatabaseServer)},
-                d.DatabaseTypeID {nameof(Database.DatabaseType)}
-            from dbo.DatabaseServer ds
-            left join dbo.[Database] d
-                on ds.DatabaseServerID = d.DatabaseServerID",
-            (ds, d) =>
-            {
-                ds.Databases ??= [];
-
-                if (d != null)
-                    ds.Databases.Add(d);
-
-                return ds;
-            },
-            splitOn: $"{nameof(Database.DatabaseId)}"
-        );
-
-        return results.ToList();
-    }
-
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerName,
-        string ipAddress
-    )
-    {
-        await locatorDb.ExecuteAsync(
-            @$"
-            update dbo.DatabaseServer
-            set
-                DatabaseServerName = @DatabaseServerName,
-                DatabaseServerIPAddress = @IPAddress
-            where
-                DatabaseServerID = @DatabaseServerID",
-            new
-            {
-                databaseServerId,
-                databaseServerName,
-                ipAddress,
-            }
-        );
-    }
-
-    public async Task DeleteDatabaseServer(int databaseServerId)
-    {
-        await locatorDb.ExecuteAsync(
-            @$"
-            delete from dbo.DatabaseServer
-            where
-                DatabaseServerID = @DatabaseServerID",
-            new { databaseServerId }
-        );
-    }
-
-    #endregion
-
-    #region Database
-
     public async Task<int> AddDatabase(
         string databaseName,
         string databaseUser,
@@ -138,7 +15,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
         DatabaseStatus databaseStatus
     )
     {
-        return await locatorDb.QuerySingleAsync<int>(
+        var databaseId = await locatorDb.QuerySingleAsync<int>(
             @$"
             insert into dbo.[Database]
             (
@@ -170,6 +47,18 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 DatabaseStatusID = (int)databaseStatus,
             }
         );
+
+        await locatorDb.ExecuteAsync(@$"create database {databaseName}");
+        await locatorDb.ExecuteAsync(
+            @$"create login {databaseUser} with password = '{databaseUserPassword}'"
+        );
+        await locatorDb.ExecuteAsync(
+            @$"
+            use {databaseName}
+            create user {databaseUser} for login {databaseUser}"
+        );
+
+        return databaseId;
     }
 
     public async Task<List<Database>> GetDatabases()
@@ -190,63 +79,138 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             );
     }
 
-    #endregion
-
-    #region DatabaseType
-
-    public async Task<int> AddDatabaseType(string databaseTypeName)
+    public async Task<PagedList<Database>> GetDatabases(
+        string keyword,
+        int pageNumber,
+        int pageSize
+    )
     {
-        return await locatorDb.QuerySingleAsync<int>(
-            @$"
-            insert into dbo.DatabaseType
-            (
-                DatabaseTypeName
-            )
-            values
-            (
-                @DatabaseTypeName
-            )
+        var whereClause = string.IsNullOrWhiteSpace(keyword)
+            ? ""
+            : "where d.DatabaseName like @Keyword";
 
-            select scope_identity()",
-            new { databaseTypeName }
+        var sql =
+            @$"
+            select
+                d.DatabaseID {nameof(Database.DatabaseId)},
+                d.DatabaseName {nameof(Database.DatabaseName)},
+                ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
+                dt.DatabaseTypeID {nameof(DatabaseType.DatabaseTypeId)}
+            from dbo.[Database] d
+            join dbo.DatabaseServer ds 
+                on d.DatabaseServerID = ds.DatabaseServerID
+            join dbo.DatabaseType dt 
+                on d.DatabaseTypeID = dt.DatabaseTypeID
+            {whereClause}
+            order by
+                d.DatabaseName
+            offset
+                @Offset rows
+            fetch next
+                @PageSize rows only";
+
+        var results = await locatorDb.QueryMultipleAsync(
+            @$"
+            select count(*) as TotalCount from dbo.[Database] d {whereClause}
+
+            {sql}",
+            new
+            {
+                keyword,
+                Offset = (pageNumber - 1) * pageSize,
+                PageSize = pageSize,
+            }
+        );
+
+        int rowCount = results.Read<int>().First();
+        return new(
+            results.Read<Database>().ToList(),
+            rowCount,
+            pageNumber,
+            pageSize,
+            (int)Math.Ceiling((double)rowCount / pageSize)
         );
     }
 
-    public async Task<List<DatabaseType>> GetDatabaseTypes()
+    public async Task<Database> GetDatabase(int databaseId)
     {
-        return (List<DatabaseType>)
-            await locatorDb.QueryAsync<DatabaseType>(
-                @$"
-                select
-                    DatabaseTypeID {nameof(DatabaseType.DatabaseTypeId)},
-                    DatabaseTypeName {nameof(DatabaseType.DatabaseTypeName)}
-                from dbo.DatabaseType"
-            );
+        var results = await locatorDb.QueryAsync<Database, DatabaseServer, DatabaseType, Database>(
+            @$"
+            select
+                d.DatabaseID {nameof(Database.DatabaseId)},
+                d.DatabaseName {nameof(Database.DatabaseName)},
+                d.DatabaseUser {nameof(Database.DatabaseUser)},
+                ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
+                ds.DatabaseServerName {nameof(DatabaseServer.DatabaseServerName)},
+                ds.DatabaseServerIpAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
+                dt.DatabaseTypeID {nameof(DatabaseType.DatabaseTypeId)},
+                dt.DatabaseTypeName {nameof(DatabaseType.DatabaseTypeName)}
+            from dbo.[Database] d
+            join dbo.DatabaseServer ds 
+                on d.DatabaseServerID = ds.DatabaseServerID
+            join dbo.DatabaseType dt 
+                on d.DatabaseTypeID = dt.DatabaseTypeID
+            where
+                d.DatabaseID = @DatabaseID",
+            (database, databaseServer, databaseType) =>
+            {
+                database.DatabaseServer = databaseServer;
+                database.DatabaseType = databaseType;
+                return database;
+            },
+            new { databaseId },
+            splitOn: "DatabaseServerID, DatabaseTypeID"
+        );
+
+        return results.FirstOrDefault();
     }
 
-    public async Task UpdateDatabaseType(int databaseTypeId, string databaseTypeName)
+    public async Task UpdateDatabase(
+        int databaseId,
+        string databaseName,
+        string databaseUser,
+        string databaseUserPassword,
+        int databaseServerId,
+        int databaseTypeId,
+        DatabaseStatus databaseStatus
+    )
     {
         await locatorDb.ExecuteAsync(
             @$"
-            update dbo.DatabaseType
+            update dbo.[Database]
             set
-                DatabaseTypeName = @DatabaseTypeName
+                DatabaseName = @DatabaseName,
+                DatabaseUser = @DatabaseUser,
+                DatabaseUserPassword = @DatabaseUserPassword,
+                DatabaseServerID = @DatabaseServerID,
+                DatabaseTypeID = @DatabaseTypeID,
+                DatabaseStatusID = @DatabaseStatusID
             where
-                DatabaseTypeID = @DatabaseTypeID",
-            new { databaseTypeId, databaseTypeName }
+                DatabaseID = @DatabaseID",
+            new
+            {
+                databaseId,
+                databaseName,
+                databaseUser,
+                databaseUserPassword,
+                databaseServerId,
+                databaseTypeId,
+                DatabaseStatusID = (int)databaseStatus,
+            }
         );
     }
 
-    public async Task RemoveDatabaseType(int databaseTypeId)
+    public async Task DeleteDatabase(Database database)
     {
+        await locatorDb.ExecuteAsync($"drop database {database.DatabaseName}");
+        await locatorDb.ExecuteAsync($"drop login {database.DatabaseUser}");
+
         await locatorDb.ExecuteAsync(
             @$"
-            delete from dbo.DatabaseType
+            delete from dbo.[Database]
             where
-                DatabaseTypeID = @DatabaseTypeID",
-            new { databaseTypeId }
+                DatabaseID = @DatabaseID",
+            new { database.DatabaseId }
         );
     }
-
-    #endregion
 }

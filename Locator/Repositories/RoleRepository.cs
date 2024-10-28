@@ -6,36 +6,6 @@ namespace Locator.Repositories;
 
 internal class RoleRepository(IDbConnection locatorDb)
 {
-    public async Task<List<Role>> GetRoles()
-    {
-        return (List<Role>)
-            await locatorDb.QueryAsync<Role>(
-                @$"
-                select
-                    RoleID {nameof(Role.RoleId)},
-                    Auth0RoleID {nameof(Role.Auth0RoleId)},
-                    Name {nameof(Role.Name)},
-                    Description {nameof(Role.Description)}
-                from dbo.Role"
-            );
-    }
-
-    public async Task<Role> GetRole(int roleId)
-    {
-        return await locatorDb.QuerySingleAsync<Role>(
-            @$"
-            select
-                RoleID {nameof(Role.RoleId)},
-                Auth0RoleID {nameof(Role.Auth0RoleId)},
-                Name {nameof(Role.Name)},
-                Description {nameof(Role.Description)}
-            from dbo.Role
-            where
-                RoleID = @RoleID",
-            new { roleId }
-        );
-    }
-
     public async Task<int> AddRole(string auth0RoleId, string name, string description)
     {
         return await locatorDb.QuerySingleAsync<int>(
@@ -61,6 +31,36 @@ internal class RoleRepository(IDbConnection locatorDb)
                 description,
             }
         );
+    }
+
+    public async Task<Role> GetRole(int roleId)
+    {
+        return await locatorDb.QuerySingleAsync<Role>(
+            @$"
+            select
+                RoleID {nameof(Role.RoleId)},
+                Auth0RoleID {nameof(Role.Auth0RoleId)},
+                Name {nameof(Role.Name)},
+                Description {nameof(Role.Description)}
+            from dbo.Role
+            where
+                RoleID = @RoleID",
+            new { roleId }
+        );
+    }
+
+    public async Task<List<Role>> GetRoles()
+    {
+        return (List<Role>)
+            await locatorDb.QueryAsync<Role>(
+                @$"
+                select
+                    RoleID {nameof(Role.RoleId)},
+                    Auth0RoleID {nameof(Role.Auth0RoleId)},
+                    Name {nameof(Role.Name)},
+                    Description {nameof(Role.Description)}
+                from dbo.Role"
+            );
     }
 
     public async Task UpdateRole(int roleId, string name, string description)
@@ -93,7 +93,6 @@ internal class RoleRepository(IDbConnection locatorDb)
         );
     }
 
-    // add user role
     public async Task<int> AddUserRole(int userId, int roleId)
     {
         return await locatorDb.QuerySingleAsync<int>(
@@ -110,6 +109,18 @@ internal class RoleRepository(IDbConnection locatorDb)
             )
             
             select scope_identity()",
+            new { userId, roleId }
+        );
+    }
+
+    public async Task DeleteUserRole(int userId, int roleId)
+    {
+        await locatorDb.ExecuteAsync(
+            @$"
+            delete from dbo.UserRole
+            where
+                UserID = @UserID
+                and RoleID = @RoleID",
             new { userId, roleId }
         );
     }
