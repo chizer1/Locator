@@ -1,19 +1,13 @@
 using System.Data;
 using Dapper;
-using Locator.Models;
+using Locator.Models.Read;
+using Locator.Models.Write;
 
 namespace Locator.Repositories;
 
 internal class DatabaseRepository(IDbConnection locatorDb)
 {
-    public async Task<int> AddDatabase(
-        string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
-        int databaseServerId,
-        int databaseTypeId,
-        DatabaseStatus databaseStatus
-    )
+    public async Task<int> AddDatabase(AddDatabase addDatabase)
     {
         var databaseId = await locatorDb.QuerySingleAsync<int>(
             @$"
@@ -39,23 +33,23 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             select scope_identity()",
             new
             {
-                databaseName,
-                databaseUser,
-                databaseUserPassword,
-                databaseServerId,
-                databaseTypeId,
-                DatabaseStatusID = (int)databaseStatus,
+                addDatabase.DatabaseName,
+                addDatabase.DatabaseUser,
+                addDatabase.DatabaseUserPassword,
+                addDatabase.DatabaseServerId,
+                addDatabase.DatabaseTypeId,
+                DatabaseStatusID = (int)addDatabase.DatabaseStatus,
             }
         );
 
-        await locatorDb.ExecuteAsync(@$"create database {databaseName}");
+        await locatorDb.ExecuteAsync(@$"create database {addDatabase.DatabaseName}");
         await locatorDb.ExecuteAsync(
-            @$"create login {databaseUser} with password = '{databaseUserPassword}'"
+            @$"create login {addDatabase.DatabaseUser} with password = '{addDatabase.DatabaseUserPassword}'"
         );
         await locatorDb.ExecuteAsync(
             @$"
-            use {databaseName}
-            create user {databaseUser} for login {databaseUser}"
+            use {addDatabase.DatabaseName}
+            create user {addDatabase.DatabaseUser} for login {addDatabase.DatabaseUser}"
         );
 
         return databaseId;
@@ -70,7 +64,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                     d.DatabaseID {nameof(Database.DatabaseId)},
                     d.DatabaseName {nameof(Database.DatabaseName)},
                     ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
-                    dt.DatabaseTypeID {nameof(DatabaseType.DatabaseTypeId)},
+                    dt.DatabaseTypeID {nameof(DatabaseType.DatabaseTypeId)}
                 from dbo.[Database] d
                 join dbo.DatabaseServer ds 
                     on d.DatabaseServerID = ds.DatabaseServerID
@@ -154,26 +148,18 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 d.DatabaseID = @DatabaseID",
             (database, databaseServer, databaseType) =>
             {
-                database.DatabaseServer = databaseServer;
+                //database.DatabaseServer = databaseServer;
                 database.DatabaseType = databaseType;
                 return database;
             },
             new { databaseId },
-            splitOn: "DatabaseServerID, DatabaseTypeID"
+            splitOn: $"DatabaseServerID, DatabaseTypeID"
         );
 
         return results.FirstOrDefault();
     }
 
-    public async Task UpdateDatabase(
-        int databaseId,
-        string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
-        int databaseServerId,
-        int databaseTypeId,
-        DatabaseStatus databaseStatus
-    )
+    public async Task UpdateDatabase(UpdateDatabase updateDatabase)
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -189,19 +175,23 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 DatabaseID = @DatabaseID",
             new
             {
-                databaseId,
-                databaseName,
-                databaseUser,
-                databaseUserPassword,
-                databaseServerId,
-                databaseTypeId,
-                DatabaseStatusID = (int)databaseStatus,
+                updateDatabase.DatabaseId,
+                updateDatabase.DatabaseName,
+                updateDatabase.DatabaseUserName,
+                updateDatabase.DatabasePassword,
+                updateDatabase.DatabaseServerId,
+                updateDatabase.DatabaseTypeId,
+                DatabaseStatusID = (int)updateDatabase.DatabaseStatus,
             }
         );
+
+        // actually name the database done here?
     }
 
-    public async Task DeleteDatabase(Database database)
+    public async Task DeleteDatabase(int databaseId)
     {
+        var database = await GetDatabase(databaseId);
+
         await locatorDb.ExecuteAsync($"drop database {database.DatabaseName}");
         await locatorDb.ExecuteAsync($"drop login {database.DatabaseUser}");
 

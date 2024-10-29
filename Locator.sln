@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Locator", "Locator\Locator.csproj", "{0CB2417F-3123-4012-964B-3016BE689574}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Console\Console.csproj", "{14BE6B1D-9153-4AB7-BE8D-C9C4AF2D8D7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "TodoApi\TodoApi.csproj", "{14BE6B1D-9153-4AB7-BE8D-C9C4AF2D8D7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

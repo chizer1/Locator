@@ -1,11 +1,11 @@
-using Locator.Models;
+using Locator.Models.Read;
 using Locator.Repositories;
 
 namespace Locator.Services;
 
 internal class UserService(
     UserRepository userRepository,
-    RoleRepository roleRepository,
+    //RoleService roleService,
     Auth0Service auth0Service
 )
 {
@@ -27,11 +27,11 @@ internal class UserService(
             auth0Id
         );
 
-        foreach (var role in roles)
-        {
-            await roleRepository.AddUserRole(userId, role.RoleId);
-            await auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
-        }
+        // foreach (var role in roles)
+        // {
+        //     await roleService.AddUserRole(userId, role);
+        //     await auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
+        // }
 
         return userId;
     }
@@ -51,14 +51,9 @@ internal class UserService(
         return await userRepository.GetUsers();
     }
 
-    public async Task<PagedList<User>> GetUsers(
-        int clientId,
-        string searchText,
-        int page,
-        int pageSize
-    )
+    public async Task<PagedList<User>> GetUsers(string searchText, int page, int pageSize)
     {
-        return await userRepository.GetUsers(clientId, searchText, page, pageSize);
+        return await userRepository.GetUsers(searchText, page, pageSize);
     }
 
     public async Task<List<UserLog>> GetUserLogs(string auth0Id)
@@ -113,8 +108,8 @@ internal class UserService(
         var accessToken = await auth0Service.GetAccessToken();
 
         var user = await userRepository.GetUser(auth0Id);
-        foreach (var role in user.Roles)
-            await roleRepository.DeleteUserRole(user.UserId, role.RoleId);
+        // foreach (var role in user.Roles)
+        //     await roleService.DeleteUserRole(user.UserId, role.RoleId);
 
         await auth0Service.DeleteUser(accessToken, auth0Id);
         await userRepository.DeleteUser(auth0Id);

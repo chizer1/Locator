@@ -1,6 +1,6 @@
 using System.Data;
 using Dapper;
-using Locator.Models;
+using Locator.Models.Read;
 
 namespace Locator.Repositories;
 
@@ -33,7 +33,7 @@ internal class UserRepository(IDbConnection locatorDb)
                 @Auth0ID
             )
 
-            select scope_identity() as UserId",
+            select scope_identity()",
             new
             {
                 firstName,
@@ -49,8 +49,7 @@ internal class UserRepository(IDbConnection locatorDb)
 
     public async Task<User> GetUser(string auth0Id)
     {
-        // get roles for user, use spliton to map to user object dapper User, Role, Connections
-        var results = await locatorDb.QueryAsync<User, Role, Connection, User>(
+        var results = await locatorDb.QueryAsync<User, Role, User>(
             @$"
             select
                 u.UserID {nameof(User.UserId)},
@@ -62,29 +61,28 @@ internal class UserRepository(IDbConnection locatorDb)
                 r.RoleID {nameof(Role.RoleId)},
                 r.Auth0RoleID {nameof(Role.Auth0RoleId)},
                 r.Name {nameof(Role.Name)},
-                r.Description {nameof(Role.Description)},
-                c.ConnectionID {nameof(Connection.ConnectionId)},
-                c.DatabaseID {nameof(Connection.Database.DatabaseId)}
+                r.Description {nameof(Role.Description)}
             from dbo.[User] u
-            inner join dbo.UserRole ur
+            left join dbo.UserRole ur
                 on ur.UserID = u.UserID
-            inner join dbo.Role r
+            left join dbo.Role r
                 on r.RoleID = ur.RoleID
-            inner join dbo.ClientUser cu
-                on cu.UserID = u.UserID
-            inner join dbo.Connection c
-                on c.ClientUserID = cu.ClientUserID
             where
                 u.Auth0ID = @Auth0ID",
-            (user, role, connection) =>
+            (user, role) =>
             {
-                // roles and connection
-                user.Roles.Add(role);
-                user.Connections.Add(connection);
+                user.Roles ??= [];
+
+                if (role != null)
+                {
+                    if (!user.Roles.Any(r => r.RoleId == role.RoleId))
+                        user.Roles.Add(role);
+                }
+
                 return user;
             },
-            new { auth0Id },
-            splitOn: $"{nameof(Role.RoleId)}, {nameof(Connection.ConnectionId)}"
+            new { Auth0ID = auth0Id },
+            splitOn: $"{nameof(Role.RoleId)}"
         );
 
         return results.FirstOrDefault();
@@ -92,24 +90,43 @@ internal class UserRepository(IDbConnection locatorDb)
 
     public async Task<User> GetUser(int userId)
     {
-        return await locatorDb.QuerySingleAsync<User>(
+        var results = await locatorDb.QueryAsync<User, Role, User>(
             @$"
-            select 
-                u.Auth0ID {nameof(User.Auth0Id)},
+            select
                 u.UserID {nameof(User.UserId)},
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatus)}
+                u.UserStatusID {nameof(User.UserStatus)},
+                u.Auth0ID {nameof(User.Auth0Id)},
+                r.RoleID {nameof(Role.RoleId)},
+                r.Auth0RoleID {nameof(Role.Auth0RoleId)},
+                r.Name {nameof(Role.Name)},
+                r.Description {nameof(Role.Description)}
             from dbo.[User] u
-            inner join dbo.UserStatus us
-                on us.UserStatusID = u.UserStatusID
-            inner join dbo.Client c
-                on c.ClientID = u.ClientID
+            left join dbo.UserRole ur
+                on ur.UserID = u.UserID
+            left join dbo.Role r
+                on r.RoleID = ur.RoleID
             where
-                u.UserID = @UserID",
-            new { userId }
+                u.UserId = @UserId",
+            (user, role) =>
+            {
+                user.Roles ??= [];
+
+                if (role != null)
+                {
+                    if (!user.Roles.Any(r => r.RoleId == role.RoleId))
+                        user.Roles.Add(role);
+                }
+
+                return user;
+            },
+            new { userId },
+            splitOn: $"{nameof(Role.RoleId)}"
         );
+
+        return results.FirstOrDefault();
     }
 
     public async Task<List<User>> GetUsers()
@@ -117,29 +134,23 @@ internal class UserRepository(IDbConnection locatorDb)
         return (
             await locatorDb.QueryAsync<User>(
                 @$"
-            select
-                u.UserID {nameof(User.UserId)},
-                u.FirstName {nameof(User.FirstName)},
-                u.LastName {nameof(User.LastName)},
-                u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatus)}
-            from dbo.[User] u
-            inner join dbo.UserStatus us
-                on us.UserStatusID = u.UserStatusID
-            inner join dbo.Client c
-                on c.ClientID = u.ClientID
-            order by
-                u.LastName asc"
+                select
+                    u.UserID {nameof(User.UserId)},
+                    u.Auth0ID {nameof(User.Auth0Id)},
+                    u.FirstName {nameof(User.FirstName)},
+                    u.LastName {nameof(User.LastName)},
+                    u.EmailAddress {nameof(User.EmailAddress)},
+                    u.UserStatusID {nameof(User.UserStatus)}
+                from dbo.[User] u
+                inner join dbo.UserStatus us
+                    on us.UserStatusID = u.UserStatusID
+                order by
+                    u.LastName asc"
             )
         ).ToList();
     }
 
-    public async Task<PagedList<User>> GetUsers(
-        int clientId,
-        string keyword,
-        int pageNumber,
-        int pageSize
-    )
+    public async Task<PagedList<User>> GetUsers(string keyword, int pageNumber, int pageSize)
     {
         var whereClause = keyword == null ? "" : " and u.LastName like '%' + @Keyword + '%'";
 
@@ -150,13 +161,11 @@ internal class UserRepository(IDbConnection locatorDb)
             from dbo.[User] u
             inner join dbo.UserStatus us
                 on us.UserStatusID = u.UserStatusID
-            inner join dbo.Client c
-                on c.ClientID = u.ClientID
-                and c.ClientID = @ClientID
             {whereClause}
 
             select
                 u.UserID {nameof(User.UserId)},
+                u.Auth0ID {nameof(User.Auth0Id)},
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
@@ -164,9 +173,6 @@ internal class UserRepository(IDbConnection locatorDb)
             from dbo.[User] u
             inner join dbo.UserStatus us
                 on us.UserStatusID = u.UserStatusID
-            inner join dbo.Client c
-                on c.ClientID = u.ClientID
-                and c.ClientID = @ClientID
             {whereClause}
             order by
                 u.LastName asc
@@ -174,7 +180,6 @@ internal class UserRepository(IDbConnection locatorDb)
             fetch next @PageSize rows only",
             new
             {
-                clientId,
                 keyword,
                 pageNumber,
                 pageSize,

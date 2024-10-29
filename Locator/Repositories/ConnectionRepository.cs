@@ -1,7 +1,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using Dapper;
-using Locator.Models;
+using Locator.Models.Read;
 
 namespace Locator.Repositories;
 

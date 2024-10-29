@@ -1,6 +1,6 @@
 using System.Data;
 using Dapper;
-using Locator.Models;
+using Locator.Models.Read;
 
 namespace Locator.Repositories;
 
@@ -45,7 +45,7 @@ internal class ClientRepository(IDbConnection locatorDb)
                 ClientID {nameof(Client.ClientId)},
                 ClientCode {nameof(Client.ClientCode)},
                 ClientName {nameof(Client.ClientName)},
-                ClientStatus {nameof(Client.ClientStatus)}
+                ClientStatusID {nameof(Client.ClientStatus)}
             from dbo.Client 
             where
                 ClientID = @ClientID",
@@ -62,7 +62,7 @@ internal class ClientRepository(IDbConnection locatorDb)
                     ClientID {nameof(Client.ClientId)},
                     ClientCode {nameof(Client.ClientCode)},
                     ClientName {nameof(Client.ClientName)},
-                    ClientStatus {nameof(Client.ClientStatus)}
+                    ClientStatusID {nameof(Client.ClientStatus)}
                 from dbo.Client
                 order by
                     ClientName asc"
@@ -81,7 +81,7 @@ internal class ClientRepository(IDbConnection locatorDb)
                 c.ClientID {nameof(Client.ClientId)},
                 c.ClientCode {nameof(Client.ClientCode)},
                 c.ClientName {nameof(Client.ClientName)},
-                c.ClientStatus {nameof(Client.ClientStatus)}
+                c.ClientStatusID {nameof(Client.ClientStatus)}
             from dbo.Client c
             inner join dbo.ClientStatus cs
                 on c.ClientStatusID = cs.ClientStatusID
@@ -141,87 +141,4 @@ internal class ClientRepository(IDbConnection locatorDb)
             new { clientId }
         );
     }
-
-    #region ClientUser
-
-    // add clientUser
-    public async Task<int> AddClientUser(int clientId, int userId)
-    {
-        return await locatorDb.QuerySingleAsync<int>(
-            @$"
-            insert into dbo.ClientUser
-            (
-                ClientID,
-                UserID
-            )
-            values
-            (
-                @ClientID,
-                @UserID
-            )
-
-            select scope_identity()",
-            new { clientId, userId }
-        );
-    }
-
-    public async Task<ClientUser> GetClientUser(int clientUserId)
-    {
-        var results = await locatorDb.QueryAsync<ClientUser, Client, User, ClientUser>(
-            @$"
-            select
-                ClientUserID {nameof(ClientUser.ClientUserId)},
-                ClientID {nameof(ClientUser.Client.ClientId)},
-                UserID {nameof(ClientUser.User.UserId)}
-            from dbo.ClientUser
-            where
-                ClientUserID = @ClientUserID",
-            (clientUser, client, user) =>
-            {
-                clientUser.Client = client;
-                clientUser.User = user;
-                return clientUser;
-            },
-            new { clientUserId },
-            splitOn: $"{nameof(Client.ClientId)}, {nameof(User.UserId)}"
-        );
-
-        return results.FirstOrDefault();
-    }
-
-    public async Task DeleteClientUser(int clientUserId)
-    {
-        await locatorDb.ExecuteAsync(
-            @$"
-            delete from dbo.ClientUser
-            where ClientUserID = @ClientUserID",
-            new { clientUserId }
-        );
-    }
-
-    #endregion
-
-    #region ClientDatabase
-
-    public async Task<int> AddClientDatabase(int clientId, int databaseId)
-    {
-        return await locatorDb.QuerySingleAsync<int>(
-            @$"
-            insert into dbo.ClientDatabase
-            (
-                ClientID,
-                DatabaseID
-            )
-            values
-            (
-                @ClientID,
-                @DatabaseID
-            )
-
-            select scope_identity()",
-            new { clientId, databaseId }
-        );
-    }
-
-    #endregion
 }

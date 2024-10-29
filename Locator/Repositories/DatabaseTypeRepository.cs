@@ -1,6 +1,6 @@
 using System.Data;
 using Dapper;
-using Locator.Models;
+using Locator.Models.Read;
 
 namespace Locator.Repositories;
 

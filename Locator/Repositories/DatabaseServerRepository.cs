@@ -1,6 +1,6 @@
 using System.Data;
 using Dapper;
-using Locator.Models;
+using Locator.Models.Read;
 
 namespace Locator.Repositories;
 
@@ -36,11 +36,9 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             select
                 ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
                 ds.DatabaseServerName {nameof(DatabaseServer.DatabaseServerName)},
-                ds.IpAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
+                ds.DatabaseServerIPAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
                 d.DatabaseID {nameof(Database.DatabaseId)},
-                d.DatabaseName {nameof(Database.DatabaseName)},
-                d.DatabaseServerID {nameof(Database.DatabaseServer)},
-                d.DatabaseTypeID {nameof(Database.DatabaseType)}
+                d.DatabaseName {nameof(Database.DatabaseName)}
             from dbo.DatabaseServer ds
             left join dbo.[Database] d
                 on ds.DatabaseServerID = d.DatabaseServerID
@@ -59,7 +57,18 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             splitOn: $"{nameof(Database.DatabaseId)}"
         );
 
-        return results.FirstOrDefault();
+        return results
+            .GroupBy(ds => ds.DatabaseServerId)
+            .Select(g =>
+            {
+                var databaseServer = g.First();
+                databaseServer.Databases = g.Select(ds => ds.Databases.FirstOrDefault())
+                    .Where(d => d != null)
+                    .ToList();
+
+                return databaseServer;
+            })
+            .FirstOrDefault();
     }
 
     public async Task<List<DatabaseServer>> GetDatabaseServers()
@@ -69,11 +78,9 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             select
                 ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
                 ds.DatabaseServerName {nameof(DatabaseServer.DatabaseServerName)},
-                ds.IpAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
+                ds.DatabaseServerIPAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
                 d.DatabaseID {nameof(Database.DatabaseId)},
-                d.DatabaseName {nameof(Database.DatabaseName)},
-                d.DatabaseServerID {nameof(Database.DatabaseServer)},
-                d.DatabaseTypeID {nameof(Database.DatabaseType)}
+                d.DatabaseName {nameof(Database.DatabaseName)}
             from dbo.DatabaseServer ds
             left join dbo.[Database] d
                 on ds.DatabaseServerID = d.DatabaseServerID",
@@ -89,13 +96,24 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             splitOn: $"{nameof(Database.DatabaseId)}"
         );
 
-        return results.ToList();
+        return results
+            .GroupBy(ds => ds.DatabaseServerId)
+            .Select(g =>
+            {
+                var databaseServer = g.First();
+                databaseServer.Databases = g.Select(ds => ds.Databases.FirstOrDefault())
+                    .Where(d => d != null)
+                    .ToList();
+
+                return databaseServer;
+            })
+            .ToList();
     }
 
     public async Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerName,
-        string ipAddress
+        string databaseServerIpAddress
     )
     {
         await locatorDb.ExecuteAsync(
@@ -103,14 +121,14 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             update dbo.DatabaseServer
             set
                 DatabaseServerName = @DatabaseServerName,
-                DatabaseServerIPAddress = @IPAddress
+                DatabaseServerIPAddress = @DatabaseServerIpAddress
             where
                 DatabaseServerID = @DatabaseServerID",
             new
             {
                 databaseServerId,
                 databaseServerName,
-                ipAddress,
+                databaseServerIpAddress,
             }
         );
     }

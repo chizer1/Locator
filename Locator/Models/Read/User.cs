@@ -1,4 +1,4 @@
-namespace Locator.Models;
+namespace Locator.Models.Read;
 
 public class User
 {
@@ -9,5 +9,4 @@ public class User
     public string EmailAddress { get; set; }
     public UserStatus UserStatus { get; set; }
     public List<Role> Roles { get; set; }
-    public List<Connection> Connections { get; set; }
 }

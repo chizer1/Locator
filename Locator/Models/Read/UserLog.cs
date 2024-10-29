@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Locator.Models;
+namespace Locator.Models.Read;
 
 public class UserLog
 {

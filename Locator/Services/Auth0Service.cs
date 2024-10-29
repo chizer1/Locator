@@ -1,5 +1,5 @@
 using System.Text;
-using Locator.Models;
+using Locator.Models.Read;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

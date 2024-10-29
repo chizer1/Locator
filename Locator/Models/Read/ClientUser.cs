@@ -1,4 +1,4 @@
-namespace Locator.Models;
+namespace Locator.Models.Read;
 
 public class ClientUser
 {

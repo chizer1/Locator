@@ -1,9 +1,13 @@
-using Locator.Models;
+using Locator.Models.Read;
 using Locator.Repositories;
 
 namespace Locator.Services;
 
-internal class RoleService(RoleRepository roleRepository, Auth0Service auth0Service)
+internal class RoleService(
+    RoleRepository roleRepository,
+    UserRoleRepository userRoleRepository,
+    Auth0Service auth0Service
+)
 {
     public async Task<List<Role>> GetRoles()
     {
@@ -29,7 +33,7 @@ internal class RoleService(RoleRepository roleRepository, Auth0Service auth0Serv
 
         await auth0Service.AssignUserToRole(accessToken, user.Auth0Id, role.Auth0RoleId);
 
-        return await roleRepository.AddUserRole(user.UserId, role.RoleId);
+        return await userRoleRepository.AddUserRole(user.UserId, role.RoleId);
     }
 
     public async Task DeleteUserRole(User user, Role role)
@@ -38,6 +42,6 @@ internal class RoleService(RoleRepository roleRepository, Auth0Service auth0Serv
 
         await auth0Service.RemoveUserFromRole(accessToken, user.Auth0Id, role.Auth0RoleId);
 
-        await roleRepository.DeleteUserRole(user.UserId, role.RoleId);
+        await userRoleRepository.DeleteUserRole(user.UserId);
     }
 }
