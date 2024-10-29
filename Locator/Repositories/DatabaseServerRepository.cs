@@ -1,15 +1,13 @@
 using System.Data;
 using Dapper;
 using Locator.Models.Read;
+using Locator.Models.Write;
 
 namespace Locator.Repositories;
 
 internal class DatabaseServerRepository(IDbConnection locatorDb)
 {
-    public async Task<int> AddDatabaseServer(
-        string databaseServerName,
-        string databaseServerIpAddress
-    )
+    public async Task<int> AddDatabaseServer(AddDatabaseServer addDatabaseServer)
     {
         return await locatorDb.QuerySingleAsync<int>(
             @$"
@@ -25,7 +23,7 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             )
 
             select scope_identity()",
-            new { databaseServerName, databaseServerIpAddress }
+            new { addDatabaseServer.DatabaseServerName, addDatabaseServer.DatabaseServerIpAddress }
         );
     }
 
@@ -110,11 +108,7 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
             .ToList();
     }
 
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerName,
-        string databaseServerIpAddress
-    )
+    public async Task UpdateDatabaseServer(UpdateDatabaseServer updateDatabaseServer)
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -126,9 +120,9 @@ internal class DatabaseServerRepository(IDbConnection locatorDb)
                 DatabaseServerID = @DatabaseServerID",
             new
             {
-                databaseServerId,
-                databaseServerName,
-                databaseServerIpAddress,
+                updateDatabaseServer.DatabaseServerId,
+                updateDatabaseServer.DatabaseServerName,
+                updateDatabaseServer.DatabaseServerIpAddress,
             }
         );
     }

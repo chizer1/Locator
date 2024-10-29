@@ -25,13 +25,13 @@ internal class ClientUserRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task DeleteClientUser(int clientUserId)
+    public async Task DeleteClientUser(int clientId, int userId)
     {
         await locatorDb.ExecuteAsync(
             @$"
             delete from dbo.ClientUser
-            where ClientUserID = @ClientUserID",
-            new { clientUserId }
+            where ClientID = @ClientID and UserID = @UserID",
+            new { clientId, userId }
         );
     }
 }

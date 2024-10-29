@@ -1,16 +1,13 @@
 using System.Data;
 using Dapper;
 using Locator.Models.Read;
+using Locator.Models.Write;
 
 namespace Locator.Repositories;
 
 internal class ClientRepository(IDbConnection locatorDb)
 {
-    public async Task<int> AddClient(
-        string clientName,
-        string clientCode,
-        ClientStatus clientStatus
-    )
+    public async Task<int> AddClient(AddClient addClient)
     {
         return await locatorDb.QuerySingleAsync<int>(
             @$"
@@ -30,9 +27,9 @@ internal class ClientRepository(IDbConnection locatorDb)
             select scope_identity()",
             new
             {
-                clientCode,
-                clientName,
-                ClientStatusID = (int)clientStatus,
+                addClient.ClientCode,
+                addClient.ClientName,
+                ClientStatusID = (int)addClient.ClientStatus,
             }
         );
     }
@@ -108,12 +105,7 @@ internal class ClientRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task UpdateClient(
-        int clientId,
-        string clientName,
-        string clientCode,
-        ClientStatus clientStatus
-    )
+    public async Task UpdateClient(UpdateClient updateClient)
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -126,10 +118,10 @@ internal class ClientRepository(IDbConnection locatorDb)
                 ClientID = @ClientID",
             new
             {
-                clientId,
-                clientName,
-                clientCode,
-                ClientStatusID = (int)clientStatus,
+                updateClient.ClientId,
+                updateClient.ClientCode,
+                updateClient.ClientName,
+                ClientStatusID = (int)updateClient.ClientStatus,
             }
         );
     }

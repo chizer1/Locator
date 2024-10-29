@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using Locator.Models.Read;
+using Locator.Models.Write;
 
 namespace Locator.Repositories;
 
@@ -196,13 +197,7 @@ internal class UserRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task UpdateUser(
-        int userId,
-        string firstName,
-        string lastName,
-        string emailAddress,
-        UserStatus userStatus
-    )
+    public async Task UpdateUser(UpdateUser updateUser)
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -216,11 +211,11 @@ internal class UserRepository(IDbConnection locatorDb)
                 UserID = @UserID",
             new
             {
-                userId,
-                firstName,
-                lastName,
-                emailAddress,
-                userStatusID = (int)userStatus,
+                updateUser.UserId,
+                updateUser.FirstName,
+                updateUser.LastName,
+                updateUser.EmailAddress,
+                UserStatusID = (int)updateUser.UserStatus,
             }
         );
     }

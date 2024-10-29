@@ -1,12 +1,13 @@
 using System.Data;
 using Dapper;
 using Locator.Models.Read;
+using Locator.Models.Write;
 
 namespace Locator.Repositories;
 
 internal class RoleRepository(IDbConnection locatorDb)
 {
-    public async Task<int> AddRole(string auth0RoleId, string name, string description)
+    public async Task<int> AddRole(string auth0RoleId, string roleName, string roleDescription)
     {
         return await locatorDb.QuerySingleAsync<int>(
             @$"
@@ -26,9 +27,9 @@ internal class RoleRepository(IDbConnection locatorDb)
             select scope_identity()",
             new
             {
-                auth0RoleId,
-                name,
-                description,
+                Auth0RoleID = auth0RoleId,
+                Name = roleName,
+                Description = roleDescription,
             }
         );
     }
@@ -63,7 +64,7 @@ internal class RoleRepository(IDbConnection locatorDb)
             );
     }
 
-    public async Task UpdateRole(int roleId, string name, string description)
+    public async Task UpdateRole(UpdateRole updateRole)
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -75,9 +76,9 @@ internal class RoleRepository(IDbConnection locatorDb)
                 RoleID = @RoleID",
             new
             {
-                roleId,
-                name,
-                description,
+                updateRole.RoleId,
+                updateRole.RoleName,
+                updateRole.RoleDescription,
             }
         );
     }

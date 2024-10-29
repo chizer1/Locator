@@ -25,13 +25,13 @@ internal class UserRoleRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task DeleteUserRole(int userRoleId)
+    public async Task DeleteUserRole(int userId, int roleId)
     {
         await locatorDb.ExecuteAsync(
             @$"
             delete from dbo.UserRole
-            where UserRoleID = @UserRoleID",
-            new { userRoleId }
+            where UserID = @UserID and RoleID = @RoleID",
+            new { userId, roleId }
         );
     }
 }

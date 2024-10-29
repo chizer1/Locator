@@ -112,13 +112,15 @@ internal class ConnectionRepository(IDbConnection locatorDb)
         return results.ToList();
     }
 
-    public async Task DeleteConnection(int connectionId)
+    public async Task DeleteConnection(int clientId, int userId)
     {
         await locatorDb.ExecuteAsync(
             @$"
             delete from dbo.Connection
-            where ConnectionID = @ConnectionID",
-            new { connectionId }
+            where
+                ClientID = @ClientID
+                and UserID = @UserID",
+            new { clientId, userId }
         );
     }
 }

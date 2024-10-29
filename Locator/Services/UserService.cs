@@ -1,29 +1,25 @@
 using Locator.Models.Read;
+using Locator.Models.Write;
 using Locator.Repositories;
 
 namespace Locator.Services;
 
-internal class UserService(
-    UserRepository userRepository,
-    //RoleService roleService,
-    Auth0Service auth0Service
-)
+internal class UserService(UserRepository userRepository, Auth0Service auth0Service)
 {
-    public async Task<int> AddUser(
-        string firstName,
-        string lastName,
-        string emailAddress,
-        List<Role> roles,
-        UserStatus userStatus
-    )
+    public async Task<int> AddUser(AddUser addUser)
     {
         var accessToken = await auth0Service.GetAccessToken();
-        var auth0Id = await auth0Service.CreateUser(accessToken, emailAddress, firstName, lastName);
+        var auth0Id = await auth0Service.CreateUser(
+            accessToken,
+            addUser.EmailAddress,
+            addUser.FirstName,
+            addUser.LastName
+        );
         var userId = await userRepository.AddUser(
-            firstName,
-            lastName,
-            emailAddress,
-            userStatus,
+            addUser.FirstName,
+            addUser.LastName,
+            addUser.EmailAddress,
+            addUser.UserStatus,
             auth0Id
         );
 
@@ -63,30 +59,23 @@ internal class UserService(
         return await auth0Service.GetUserLogs(accessToken, auth0Id);
     }
 
-    public async Task UpdateUser(
-        int userId,
-        string auth0Id,
-        string firstName,
-        string lastName,
-        string emailAddress,
-        UserStatus userStatus,
-        List<Role> roles
-    )
+    public async Task UpdateUser(UpdateUser updateUser)
     {
         var accessToken = await auth0Service.GetAccessToken();
+        var user = await userRepository.GetUser(updateUser.UserId);
 
         await auth0Service.UpdateUser(
             accessToken,
-            auth0Id,
-            firstName,
-            lastName,
-            emailAddress,
-            userStatus == UserStatus.Active
+            user.Auth0Id,
+            updateUser.FirstName,
+            updateUser.LastName,
+            updateUser.EmailAddress,
+            updateUser.UserStatus == UserStatus.Active
         );
 
         // add/remove roles in this block here
 
-        await userRepository.UpdateUser(userId, firstName, lastName, emailAddress, userStatus);
+        await userRepository.UpdateUser(updateUser);
     }
 
     public async Task UpdateUserPassword(string password, string auth0Id)

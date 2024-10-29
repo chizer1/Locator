@@ -35,7 +35,7 @@ public class LocatorLib()
         _userService = new(_userRepository, _auth0Service);
         _userRoleRepository = new(locatorDb);
         _roleRepository = new(locatorDb);
-        _roleService = new(_roleRepository, _userRoleRepository, _auth0Service);
+        _roleService = new(_roleRepository, _userService, _userRoleRepository, _auth0Service);
         _clientRepository = new(locatorDb);
         _clientUserRepository = new(locatorDb);
         _connectionRepository = new(locatorDb);
@@ -44,15 +44,9 @@ public class LocatorLib()
         _databaseTypeRepository = new(locatorDb);
     }
 
-    public async Task<int> AddUser(
-        string firstName,
-        string lastName,
-        string emailAddress,
-        List<Role> roles,
-        UserStatus userStatus
-    )
+    public async Task<int> AddUser(AddUser addUser)
     {
-        return await _userService.AddUser(firstName, lastName, emailAddress, roles, userStatus);
+        return await _userService.AddUser(addUser);
     }
 
     public async Task<User> GetUser(string auth0Id)
@@ -80,30 +74,14 @@ public class LocatorLib()
         return await _userService.GetUserLogs(auth0Id);
     }
 
-    public async Task UpdateUser(
-        int userId,
-        string auth0Id,
-        string firstName,
-        string lastName,
-        string emailAddress,
-        UserStatus userStatus,
-        List<Role> roles
-    )
+    public async Task UpdateUser(UpdateUser updateUser)
     {
-        await _userService.UpdateUser(
-            userId,
-            auth0Id,
-            firstName,
-            lastName,
-            emailAddress,
-            userStatus,
-            roles
-        );
+        await _userService.UpdateUser(updateUser);
     }
 
-    public async Task<int> AddRole(string name, string description)
+    public async Task<int> AddRole(AddRole addRole)
     {
-        return await _roleService.AddRole(name, description);
+        return await _roleService.AddRole(addRole);
     }
 
     public async Task<List<Role>> GetRoles()
@@ -131,23 +109,19 @@ public class LocatorLib()
         return await _connectionRepository.GetConnections();
     }
 
-    public async Task<int> AddUserRole(User user, Role role)
+    public async Task<int> AddUserRole(int userId, int roleId)
     {
-        return await _roleService.AddUserRole(user, role);
+        return await _roleService.AddUserRole(userId, roleId);
     }
 
-    public async Task DeleteUserRole(User user, Role role)
+    public async Task DeleteUserRole(int userId, int roleId)
     {
-        await _roleService.DeleteUserRole(user, role);
+        await _roleService.DeleteUserRole(userId, roleId);
     }
 
-    public async Task<int> AddClient(
-        string clientName,
-        string clientCode,
-        ClientStatus clientStatus
-    )
+    public async Task<int> AddClient(AddClient addClient)
     {
-        return await _clientRepository.AddClient(clientName, clientCode, clientStatus);
+        return await _clientRepository.AddClient(addClient);
     }
 
     public async Task<List<Client>> GetClients()
@@ -185,9 +159,9 @@ public class LocatorLib()
         return await _databaseRepository.GetDatabase(databaseId);
     }
 
-    public async Task<int> AddDatabaseServer(string serverName, string serverIpAddress)
+    public async Task<int> AddDatabaseServer(AddDatabaseServer addDatabaseServer)
     {
-        return await _databaseServerRepository.AddDatabaseServer(serverName, serverIpAddress);
+        return await _databaseServerRepository.AddDatabaseServer(addDatabaseServer);
     }
 
     public async Task<List<DatabaseServer>> GetDatabaseServers()
@@ -225,27 +199,14 @@ public class LocatorLib()
         await _databaseTypeRepository.DeleteDatabaseType(databaseTypeId);
     }
 
-    public async Task UpdateClient(
-        int clientId,
-        string clientName,
-        string clientCode,
-        ClientStatus clientStatus
-    )
+    public async Task UpdateClient(UpdateClient updateClient)
     {
-        await _clientRepository.UpdateClient(clientId, clientName, clientCode, clientStatus);
+        await _clientRepository.UpdateClient(updateClient);
     }
 
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string serverName,
-        string serverIpAddress
-    )
+    public async Task UpdateDatabaseServer(UpdateDatabaseServer updateDatabaseServer)
     {
-        await _databaseServerRepository.UpdateDatabaseServer(
-            databaseServerId,
-            serverName,
-            serverIpAddress
-        );
+        await _databaseServerRepository.UpdateDatabaseServer(updateDatabaseServer);
     }
 
     public async Task UpdateDatabase(UpdateDatabase updateDatabase)
@@ -258,9 +219,9 @@ public class LocatorLib()
         await _databaseRepository.DeleteDatabase(databaseId);
     }
 
-    public async Task UpdateRole(int roleId, string name, string description)
+    public async Task UpdateRole(UpdateRole updateRole)
     {
-        await _roleRepository.UpdateRole(roleId, name, description);
+        await _roleRepository.UpdateRole(updateRole);
     }
 
     public async Task DeleteRole(int roleId)
@@ -273,9 +234,15 @@ public class LocatorLib()
         await _clientRepository.DeleteClient(clientId);
     }
 
-    public async Task DeleteConnection(int connectionId)
+    // delete client user
+    public async Task DeleteClientUser(int clientId, int userId)
     {
-        await _connectionRepository.DeleteConnection(connectionId);
+        await _clientUserRepository.DeleteClientUser(clientId, userId);
+    }
+
+    public async Task DeleteConnection(int clientId, int userId)
+    {
+        await _connectionRepository.DeleteConnection(clientId, userId);
     }
 
     public async Task DeleteDatabaseServer(int databaseServerId)

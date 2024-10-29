@@ -30,15 +30,9 @@ app.UseHttpsRedirection();
 
 app.MapPost(
     "/addUser",
-    async (
-        string firstName,
-        string lastName,
-        string emailAddress,
-        List<Role> roles,
-        UserStatus userStatus
-    ) =>
+    async (AddUser addUser) =>
     {
-        return await locator.AddUser(firstName, lastName, emailAddress, roles, userStatus);
+        return await locator.AddUser(addUser);
     }
 );
 
@@ -60,25 +54,9 @@ app.MapGet(
 
 app.MapPut(
     "/updateUser",
-    async (
-        int userId,
-        string auth0Id,
-        string firstName,
-        string lastName,
-        string emailAddress,
-        UserStatus userStatus,
-        List<Role> roles
-    ) =>
+    async (UpdateUser updateUser) =>
     {
-        await locator.UpdateUser(
-            userId,
-            auth0Id,
-            firstName,
-            lastName,
-            emailAddress,
-            userStatus,
-            roles
-        );
+        await locator.UpdateUser(updateUser);
     }
 );
 
@@ -96,9 +74,9 @@ app.MapDelete(
 
 app.MapPost(
     "/addClient",
-    async (string clientName, string clientCode, ClientStatus clientStatus) =>
+    async (AddClient addClient) =>
     {
-        return await locator.AddClient(clientName, clientCode, clientStatus);
+        return await locator.AddClient(addClient);
     }
 );
 
@@ -120,9 +98,9 @@ app.MapGet(
 
 app.MapPut(
     "/updateClient",
-    async (int clientId, string clientName, string clientCode, ClientStatus clientStatus) =>
+    async (UpdateClient updateClient) =>
     {
-        await locator.UpdateClient(clientId, clientName, clientCode, clientStatus);
+        await locator.UpdateClient(updateClient);
     }
 );
 
@@ -136,13 +114,97 @@ app.MapDelete(
 
 #endregion
 
+#region Role Endpoints
+
+app.MapPost(
+    "/addRole",
+    async (AddRole addRole) =>
+    {
+        return await locator.AddRole(addRole);
+    }
+);
+
+app.MapGet(
+    "/getRole",
+    async (int roleId) =>
+    {
+        return await locator.GetRole(roleId);
+    }
+);
+
+app.MapGet(
+    "/getRoles",
+    async () =>
+    {
+        return await locator.GetRoles();
+    }
+);
+
+app.MapPut(
+    "/updateRole",
+    async (UpdateRole updateRole) =>
+    {
+        await locator.UpdateRole(updateRole);
+    }
+);
+
+app.MapDelete(
+    "/deleteRole",
+    async (int roleId) =>
+    {
+        await locator.DeleteRole(roleId);
+    }
+);
+
+#endregion
+
+#region User Role Endpoints
+
+app.MapPost(
+    "/addUserRole",
+    async (int userId, int roleId) =>
+    {
+        return await locator.AddUserRole(userId, roleId);
+    }
+);
+
+app.MapDelete(
+    "/deleteUserRole",
+    async (int userId, int roleId) =>
+    {
+        await locator.DeleteUserRole(userId, roleId);
+    }
+);
+
+#endregion
+
+#region Client User Endpoints
+
+app.MapPost(
+    "/addClientUser",
+    async (int clientId, int userId) =>
+    {
+        return await locator.AddClientUser(clientId, userId);
+    }
+);
+
+app.MapDelete(
+    "/deleteClientUser",
+    async (int clientId, int userId) =>
+    {
+        await locator.DeleteClientUser(clientId, userId);
+    }
+);
+
+#endregion
+
 #region Database Server Endpoints
 
 app.MapPost(
     "/addDatabaseServer",
-    async (string serverName, string serverIpAddress) =>
+    async (AddDatabaseServer addDatabaseServer) =>
     {
-        return await locator.AddDatabaseServer(serverName, serverIpAddress);
+        return await locator.AddDatabaseServer(addDatabaseServer);
     }
 );
 
@@ -164,9 +226,9 @@ app.MapGet(
 
 app.MapPut(
     "/updateDatabaseServer",
-    async (int serverId, string serverName, string serverIpAddress) =>
+    async (UpdateDatabaseServer updateDatabaseServer) =>
     {
-        await locator.UpdateDatabaseServer(serverId, serverName, serverIpAddress);
+        await locator.UpdateDatabaseServer(updateDatabaseServer);
     }
 );
 
@@ -219,6 +281,70 @@ app.MapDelete(
     async (int databaseId) =>
     {
         await locator.DeleteDatabase(databaseId);
+    }
+);
+
+#endregion
+
+#region Database Type Endpoints
+
+app.MapPost(
+    "/addDatabaseType",
+    async (string name) =>
+    {
+        return await locator.AddDatabaseType(name);
+    }
+);
+
+app.MapGet(
+    "/getDatabaseType",
+    async (int databaseTypeId) =>
+    {
+        return await locator.GetDatabaseType(databaseTypeId);
+    }
+);
+
+app.MapGet(
+    "/getDatabaseTypes",
+    async () =>
+    {
+        return await locator.GetDatabaseTypes();
+    }
+);
+
+app.MapPut(
+    "/updateDatabaseType",
+    async (int databaseTypeId, string name) =>
+    {
+        await locator.UpdateDatabaseType(databaseTypeId, name);
+    }
+);
+
+app.MapDelete(
+    "/deleteDatabaseType",
+    async (int databaseTypeId) =>
+    {
+        await locator.DeleteDatabaseType(databaseTypeId);
+    }
+);
+
+#endregion
+
+#region Connection Endpoints
+
+app.MapPost(
+    "/addConnection",
+    async (int clientId, int databaseId) =>
+    {
+        return await locator.AddConnection(clientId, databaseId);
+    }
+);
+
+app.MapDelete(
+    "/deleteConnection",
+    async (int clientId, int databaseId) =>
+    {
+        await locator.DeleteConnection(clientId, databaseId);
     }
 );
 
