@@ -234,7 +234,6 @@ public class LocatorLib()
         await _clientRepository.DeleteClient(clientId);
     }
 
-    // delete client user
     public async Task DeleteClientUser(int clientId, int userId)
     {
         await _clientUserRepository.DeleteClientUser(clientId, userId);

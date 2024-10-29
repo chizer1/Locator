@@ -15,9 +15,6 @@ public class UpdateDatabase
     public string DatabaseUserName { get; set; }
 
     [Required]
-    public string DatabasePassword { get; set; }
-
-    [Required]
     public int DatabaseServerId { get; set; }
 
     [Required]

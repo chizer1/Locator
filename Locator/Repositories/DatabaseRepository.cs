@@ -15,7 +15,6 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             (
                 DatabaseName,
                 DatabaseUser,
-                DatabaseUserPassword,
                 DatabaseServerID,
                 DatabaseTypeID,
                 DatabaseStatusID
@@ -24,7 +23,6 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             (
                 @DatabaseName,
                 @DatabaseUser,
-                @DatabaseUserPassword,
                 @DatabaseServerID,
                 @DatabaseTypeID,
                 @DatabaseStatusID
@@ -35,7 +33,6 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             {
                 addDatabase.DatabaseName,
                 addDatabase.DatabaseUser,
-                addDatabase.DatabaseUserPassword,
                 addDatabase.DatabaseServerId,
                 addDatabase.DatabaseTypeId,
                 DatabaseStatusID = (int)addDatabase.DatabaseStatus,
@@ -44,7 +41,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
 
         await locatorDb.ExecuteAsync(@$"create database {addDatabase.DatabaseName}");
         await locatorDb.ExecuteAsync(
-            @$"create login {addDatabase.DatabaseUser} with password = '{addDatabase.DatabaseUserPassword}'"
+            @$"create login {addDatabase.DatabaseUser} with password = 'Skyline-Armory-Paramount3-Shut'"
         );
         await locatorDb.ExecuteAsync(
             @$"
@@ -133,7 +130,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             select
                 d.DatabaseID {nameof(Database.DatabaseId)},
                 d.DatabaseName {nameof(Database.DatabaseName)},
-                d.DatabaseUser {nameof(Database.DatabaseUser)},
+                d.DatabaseUser {nameof(Database.DatabaseUserName)},
                 ds.DatabaseServerID {nameof(DatabaseServer.DatabaseServerId)},
                 ds.DatabaseServerName {nameof(DatabaseServer.DatabaseServerName)},
                 ds.DatabaseServerIpAddress {nameof(DatabaseServer.DatabaseServerIpAddress)},
@@ -161,13 +158,14 @@ internal class DatabaseRepository(IDbConnection locatorDb)
 
     public async Task UpdateDatabase(UpdateDatabase updateDatabase)
     {
+        var database = await GetDatabase(updateDatabase.DatabaseId);
+
         await locatorDb.ExecuteAsync(
             @$"
             update dbo.[Database]
             set
                 DatabaseName = @DatabaseName,
                 DatabaseUser = @DatabaseUser,
-                DatabaseUserPassword = @DatabaseUserPassword,
                 DatabaseServerID = @DatabaseServerID,
                 DatabaseTypeID = @DatabaseTypeID,
                 DatabaseStatusID = @DatabaseStatusID
@@ -178,14 +176,25 @@ internal class DatabaseRepository(IDbConnection locatorDb)
                 updateDatabase.DatabaseId,
                 updateDatabase.DatabaseName,
                 updateDatabase.DatabaseUserName,
-                updateDatabase.DatabasePassword,
                 updateDatabase.DatabaseServerId,
                 updateDatabase.DatabaseTypeId,
                 DatabaseStatusID = (int)updateDatabase.DatabaseStatus,
             }
         );
 
-        // actually name the database done here?
+        if (database.DatabaseName != updateDatabase.DatabaseName)
+            await locatorDb.ExecuteAsync(
+                $"alter database {database.DatabaseName} modify name = {updateDatabase.DatabaseName}"
+            );
+
+        if (database.DatabaseUserName != updateDatabase.DatabaseUserName)
+        {
+            await locatorDb.ExecuteAsync(
+                @$"
+                use {updateDatabase.DatabaseName}
+                alter user {database.DatabaseUserName} with name = {updateDatabase.DatabaseUserName}"
+            );
+        }
     }
 
     public async Task DeleteDatabase(int databaseId)
@@ -193,7 +202,7 @@ internal class DatabaseRepository(IDbConnection locatorDb)
         var database = await GetDatabase(databaseId);
 
         await locatorDb.ExecuteAsync($"drop database {database.DatabaseName}");
-        await locatorDb.ExecuteAsync($"drop login {database.DatabaseUser}");
+        await locatorDb.ExecuteAsync($"drop login {database.DatabaseUserName}");
 
         await locatorDb.ExecuteAsync(
             @$"

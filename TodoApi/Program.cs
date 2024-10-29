@@ -1,6 +1,5 @@
 using System.Data.SqlClient;
 using Locator;
-using Locator.Models.Read;
 using Locator.Models.Write;
 
 LocatorLib locator =
@@ -13,18 +12,30 @@ LocatorLib locator =
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors();
+builder.Services.AddAuthentication().AddJwtBearer();
+builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthorizationBuilder()
+  .AddPolicy("admin_greetings", policy =>
+        policy
+            .RequireRole("admin")
+            .RequireClaim("scope", "greetings_api"));
+
 var app = builder.Build();
+
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 #region User Endpoints
 
@@ -34,7 +45,7 @@ app.MapPost(
     {
         return await locator.AddUser(addUser);
     }
-);
+).WithTags("User");
 
 app.MapGet(
     "/getUser",
@@ -42,7 +53,7 @@ app.MapGet(
     {
         return await locator.GetUser(userId);
     }
-);
+).WithTags("User");
 
 app.MapGet(
     "/getUsers",
@@ -50,7 +61,7 @@ app.MapGet(
     {
         return await locator.GetUsers();
     }
-);
+).WithTags("User");
 
 app.MapPut(
     "/updateUser",
@@ -58,7 +69,7 @@ app.MapPut(
     {
         await locator.UpdateUser(updateUser);
     }
-);
+).WithTags("User");
 
 app.MapDelete(
     "/deleteUser",
@@ -66,7 +77,7 @@ app.MapDelete(
     {
         await locator.DeleteUser(auth0Id);
     }
-);
+).WithTags("User");
 
 #endregion
 
@@ -78,7 +89,7 @@ app.MapPost(
     {
         return await locator.AddClient(addClient);
     }
-);
+).WithTags("Client");
 
 app.MapGet(
     "/getClient",
@@ -86,7 +97,7 @@ app.MapGet(
     {
         return await locator.GetClient(clientId);
     }
-);
+).WithTags("Client");
 
 app.MapGet(
     "/getClients",
@@ -94,7 +105,7 @@ app.MapGet(
     {
         return await locator.GetClients();
     }
-);
+).WithTags("Client");
 
 app.MapPut(
     "/updateClient",
@@ -102,7 +113,7 @@ app.MapPut(
     {
         await locator.UpdateClient(updateClient);
     }
-);
+).WithTags("Client");
 
 app.MapDelete(
     "/deleteClient",
@@ -110,7 +121,7 @@ app.MapDelete(
     {
         await locator.DeleteClient(clientId);
     }
-);
+).WithTags("Client");
 
 #endregion
 
@@ -122,7 +133,7 @@ app.MapPost(
     {
         return await locator.AddRole(addRole);
     }
-);
+).WithTags("Role");
 
 app.MapGet(
     "/getRole",
@@ -130,7 +141,7 @@ app.MapGet(
     {
         return await locator.GetRole(roleId);
     }
-);
+).WithTags("Role");
 
 app.MapGet(
     "/getRoles",
@@ -138,7 +149,7 @@ app.MapGet(
     {
         return await locator.GetRoles();
     }
-);
+).WithTags("Role");
 
 app.MapPut(
     "/updateRole",
@@ -146,7 +157,7 @@ app.MapPut(
     {
         await locator.UpdateRole(updateRole);
     }
-);
+).WithTags("Role");
 
 app.MapDelete(
     "/deleteRole",
@@ -154,7 +165,7 @@ app.MapDelete(
     {
         await locator.DeleteRole(roleId);
     }
-);
+).WithTags("Role");
 
 #endregion
 
@@ -166,7 +177,7 @@ app.MapPost(
     {
         return await locator.AddUserRole(userId, roleId);
     }
-);
+).WithTags("UserRole");
 
 app.MapDelete(
     "/deleteUserRole",
@@ -174,7 +185,7 @@ app.MapDelete(
     {
         await locator.DeleteUserRole(userId, roleId);
     }
-);
+).WithTags("UserRole");
 
 #endregion
 
@@ -186,7 +197,7 @@ app.MapPost(
     {
         return await locator.AddClientUser(clientId, userId);
     }
-);
+).WithTags("ClientUser");
 
 app.MapDelete(
     "/deleteClientUser",
@@ -194,7 +205,7 @@ app.MapDelete(
     {
         await locator.DeleteClientUser(clientId, userId);
     }
-);
+).WithTags("ClientUser");
 
 #endregion
 
@@ -206,7 +217,7 @@ app.MapPost(
     {
         return await locator.AddDatabaseServer(addDatabaseServer);
     }
-);
+).WithTags("DatabaseServer");
 
 app.MapGet(
     "/getDatabaseServer",
@@ -214,7 +225,7 @@ app.MapGet(
     {
         return await locator.GetDatabaseServer(serverId);
     }
-);
+).WithTags("DatabaseServer");
 
 app.MapGet(
     "/getDatabaseServers",
@@ -222,7 +233,7 @@ app.MapGet(
     {
         return await locator.GetDatabaseServers();
     }
-);
+).WithTags("DatabaseServer");
 
 app.MapPut(
     "/updateDatabaseServer",
@@ -230,7 +241,7 @@ app.MapPut(
     {
         await locator.UpdateDatabaseServer(updateDatabaseServer);
     }
-);
+).WithTags("DatabaseServer");
 
 app.MapDelete(
     "/deleteDatabaseServer",
@@ -238,7 +249,7 @@ app.MapDelete(
     {
         await locator.DeleteDatabaseServer(serverId);
     }
-);
+).WithTags("DatabaseServer");
 
 #endregion
 
@@ -250,7 +261,7 @@ app.MapPost(
     {
         return await locator.AddDatabase(addDatabase);
     }
-);
+).WithTags("Database");
 
 app.MapGet(
     "/getDatabase",
@@ -258,7 +269,7 @@ app.MapGet(
     {
         return await locator.GetDatabase(databaseId);
     }
-);
+).WithTags("Database");
 
 app.MapGet(
     "/getDatabases",
@@ -266,7 +277,7 @@ app.MapGet(
     {
         return await locator.GetDatabases();
     }
-);
+).WithTags("Database");
 
 app.MapPut(
     "/updateDatabase",
@@ -274,7 +285,7 @@ app.MapPut(
     {
         await locator.UpdateDatabase(updateDatabase);
     }
-);
+).WithTags("Database");
 
 app.MapDelete(
     "/deleteDatabase",
@@ -282,7 +293,7 @@ app.MapDelete(
     {
         await locator.DeleteDatabase(databaseId);
     }
-);
+).WithTags("Database");
 
 #endregion
 
@@ -294,7 +305,7 @@ app.MapPost(
     {
         return await locator.AddDatabaseType(name);
     }
-);
+).WithTags("DatabaseType");
 
 app.MapGet(
     "/getDatabaseType",
@@ -302,7 +313,7 @@ app.MapGet(
     {
         return await locator.GetDatabaseType(databaseTypeId);
     }
-);
+).WithTags("DatabaseType");
 
 app.MapGet(
     "/getDatabaseTypes",
@@ -310,7 +321,7 @@ app.MapGet(
     {
         return await locator.GetDatabaseTypes();
     }
-);
+).WithTags("DatabaseType");
 
 app.MapPut(
     "/updateDatabaseType",
@@ -318,7 +329,7 @@ app.MapPut(
     {
         await locator.UpdateDatabaseType(databaseTypeId, name);
     }
-);
+).WithTags("DatabaseType");
 
 app.MapDelete(
     "/deleteDatabaseType",
@@ -326,7 +337,7 @@ app.MapDelete(
     {
         await locator.DeleteDatabaseType(databaseTypeId);
     }
-);
+).WithTags("DatabaseType");
 
 #endregion
 
@@ -338,7 +349,15 @@ app.MapPost(
     {
         return await locator.AddConnection(clientId, databaseId);
     }
-);
+).WithTags("Connection");
+
+app.MapGet(
+    "/getConnection",
+    async (int connectionId) =>
+    {
+        return await locator.GetConnection(connectionId);
+    }
+).WithTags("Connection");
 
 app.MapDelete(
     "/deleteConnection",
@@ -346,8 +365,20 @@ app.MapDelete(
     {
         await locator.DeleteConnection(clientId, databaseId);
     }
-);
+).WithTags("Connection");
 
 #endregion
+
+app.MapGet(
+    "/getDataFromClientDatabase",
+    async (int clientId, int databaseTypeId) =>
+    {
+        // get auth0Id from bearer token
+
+
+        return await locator.GetConnection("1", clientId, databaseTypeId);
+    }
+).WithTags("A Connection To Client DB");
+
 
 app.Run();

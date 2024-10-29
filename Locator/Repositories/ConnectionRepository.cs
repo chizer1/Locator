@@ -85,8 +85,9 @@ internal class ConnectionRepository(IDbConnection locatorDb)
             $@"
             Server={connection.DatabaseServerName};
             User Id={connection.DatabaseUser};
-            Password={connection.DatabaseUserPassword};
+            Password=Skyline-Armory-Paramount3-Shut;
             Database={connection.DatabaseName};"
+        // change to trusted connection for windows auth or kerberos, and no password
         );
     }
 

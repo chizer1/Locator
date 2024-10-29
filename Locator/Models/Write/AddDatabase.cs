@@ -12,9 +12,6 @@ public class AddDatabase
     public string DatabaseUser { get; set; }
 
     [Required]
-    public string DatabaseUserPassword { get; set; }
-
-    [Required]
     public int DatabaseServerId { get; set; }
 
     [Required]
