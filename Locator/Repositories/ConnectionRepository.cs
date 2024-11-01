@@ -58,8 +58,7 @@ internal class ConnectionRepository(IDbConnection locatorDb)
             select
                 dbs.DatabaseServerName,
                 db.DatabaseName,
-                db.DatabaseUser,
-                db.DatabaseUserPassword
+                db.DatabaseUser
             from [User] u
             inner join ClientUser cu
                 on u.UserID = cu.UserID

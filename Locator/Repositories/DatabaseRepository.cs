@@ -39,6 +39,8 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             }
         );
 
+        // data reader / data writer permissions?
+
         await locatorDb.ExecuteAsync(@$"create database {addDatabase.DatabaseName}");
         await locatorDb.ExecuteAsync(
             @$"create login {addDatabase.DatabaseUser} with password = 'Skyline-Armory-Paramount3-Shut'"

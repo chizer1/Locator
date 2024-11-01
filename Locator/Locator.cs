@@ -4,6 +4,7 @@ using Locator.Models.Read;
 using Locator.Models.Write;
 using Locator.Repositories;
 using Locator.Services;
+using Locator.Utils;
 
 namespace Locator;
 
@@ -139,9 +140,9 @@ public class LocatorLib()
         return await _clientUserRepository.AddClientUser(clientId, userId);
     }
 
-    public async Task<int> AddConnection(int clientId, int databaseId)
+    public async Task<int> AddConnection(int clientUserId, int databaseId)
     {
-        return await _connectionRepository.AddConnection(clientId, databaseId);
+        return await _connectionRepository.AddConnection(clientUserId, databaseId);
     }
 
     public async Task<int> AddDatabase(AddDatabase addDatabase)
@@ -252,5 +253,10 @@ public class LocatorLib()
     public async Task DeleteUser(string auth0Id)
     {
         await _userService.DeleteUser(auth0Id);
+    }
+
+    public string GetAuth0Id(HttpContext httpContext)
+    {
+        return HttpContextUtils.GetAuth0Id(httpContext);
     }
 }

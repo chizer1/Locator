@@ -17,6 +17,16 @@
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "7.1.2"
         }
       },
+      "Microsoft.IdentityModel.JsonWebTokens": {
+        "type": "Direct",
+        "requested": "[8.1.2, )",
+        "resolved": "8.1.2",
+        "contentHash": "AWQINMvtamdYBqtG8q8muyYTfA9i5xRBEsMKQdzOn5xRzhVVDSzsNGYof1docfF3pX4hNRUpHlzs61RP0reZMw==",
+        "dependencies": {
+          "Microsoft.Bcl.TimeProvider": "8.0.1",
+          "Microsoft.IdentityModel.Tokens": "8.1.2"
+        }
+      },
       "Microsoft.IdentityModel.Tokens": {
         "type": "Direct",
         "requested": "[8.1.2, )",
@@ -109,14 +119,6 @@
         "type": "Transitive",
         "resolved": "8.1.2",
         "contentHash": "QSSDer3kvyTdNq6BefgX4EYi1lsia2zJUh5CfIMZFQUh6BhrXK1WE4i2C9ltUmmuUjoeVVX6AaSo9NZfpTGNdw=="
-      },
-      "Microsoft.IdentityModel.JsonWebTokens": {
-        "type": "Transitive",
-        "resolved": "7.1.2",
-        "contentHash": "cloLGeZolXbCJhJBc5OC05uhrdhdPL6MWHuVUnkkUvPDeK7HkwThBaLZ1XjBQVk9YhxXE2OvHXnKi0PLleXxDg==",
-        "dependencies": {
-          "Microsoft.IdentityModel.Tokens": "7.1.2"
-        }
       },
       "Microsoft.IdentityModel.Logging": {
         "type": "Transitive",
