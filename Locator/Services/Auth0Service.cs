@@ -57,7 +57,6 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
             password = Guid.NewGuid().ToString(),
             verify_email = false,
             connection = "Username-Password-Authentication",
-            //app_metadata = new { client_code = clientCode },
         };
         string jsonContent = JsonConvert.SerializeObject(userMetadata);
 
@@ -270,7 +269,6 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
         return JObject.Parse(responseString)["ticket"]?.ToString();
     }
 
-    // add auth0 role
     public async Task<string> AddRole(string accessToken, string name, string description)
     {
         using HttpClient client = new();
@@ -293,5 +291,48 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
             throw new Exception($"Auth0 Exception. Failed to add role: {responseString}");
 
         return JObject.Parse(responseString)["id"]?.ToString();
+    }
+
+    public async Task DeleteRole(string accessToken, string auth0RoleId)
+    {
+        using HttpClient client = new();
+
+        var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}";
+        HttpRequestMessage request = new(HttpMethod.Delete, requestUri);
+
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await client.SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Auth0 Exception. Failed to delete role: {responseString}");
+    }
+
+    public async Task UpdateRole(
+        string accessToken,
+        string auth0RoleId,
+        string name,
+        string description
+    )
+    {
+        using HttpClient client = new();
+
+        dynamic roleData = new { name, description };
+        string jsonContent = JsonConvert.SerializeObject(roleData);
+
+        var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}";
+        HttpRequestMessage request =
+            new(HttpMethod.Patch, requestUri)
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
+            };
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await client.SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Auth0 Exception. Failed to update role: {responseString}");
     }
 }

@@ -4,7 +4,7 @@ using Locator;
 using Locator.Models.Write;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;;
+using Microsoft.OpenApi.Models;
 
 LocatorLib locator =
     new(
@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
             Description = "JWT Authorization header using the Bearer scheme",
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
-            BearerFormat = "JWT"
+            BearerFormat = "JWT",
         }
     );
     c.AddSecurityRequirement(
@@ -41,11 +41,11 @@ builder.Services.AddSwaggerGen(c =>
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
+                        Id = "Bearer",
+                    },
                 },
                 Array.Empty<string>()
-            }
+            },
         }
     );
 });
@@ -67,7 +67,10 @@ builder
         options.Audience = builder.Configuration["Auth0:Audience"];
     });
 
-builder.Services.AddAuthorizationBuilder();
+builder
+    .Services.AddAuthorizationBuilder()
+    .AddPolicy("ConvisiAdmin", policy => policy.RequireClaim("permissions", "ConvisiAdmin"));
+
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
 var app = builder.Build();
@@ -83,12 +86,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.Use(async (context, next) =>
-{
-    context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+app.Use(
+    async (context, next) =>
+    {
+        //context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
-    await next();
-});
+        await next();
+    }
+);
 
 #region User Endpoints
 
@@ -466,12 +471,11 @@ app.MapGet(
             var auth0Id = request.HttpContext.Items["Auth0Id"]!.ToString();
 
             var db = await locator.GetConnection(auth0Id, clientId, databaseTypeId);
-            
+
             return await db.QueryAsync<dynamic>("SELECT * FROM dbo.Stuff");
         }
     )
     .WithTags("A Connection To Client DB")
-    .RequireAuthorization();
-    
+    .RequireAuthorization("ConvisiAdmin");
 
 app.Run();

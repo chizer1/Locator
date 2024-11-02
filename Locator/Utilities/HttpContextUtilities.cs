@@ -1,12 +1,12 @@
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Locator.Utils;
+namespace Locator.Utilities;
 
-internal static class HttpContextUtils
+internal static class HttpContextUtilities
 {
     public static string GetAuth0Id(HttpContext httpContext)
     {
-        var idToken = GetIdToken(httpContext);
+        var idToken = GetAccessToken(httpContext);
 
         if (IsTokenExpired(idToken))
             throw new Exception("Token is expired");
@@ -14,14 +14,14 @@ internal static class HttpContextUtils
         return GetAuth0Id(idToken);
     }
 
-    private static JsonWebToken GetIdToken(HttpContext httpContext)
+    private static JsonWebToken GetAccessToken(HttpContext httpContext)
     {
-        string idToken = null;
+        string accessToken = null;
         if (httpContext.Request.Headers.TryGetValue("Authorization", out var value))
-            idToken = value.ToString().Replace("Bearer ", "");
+            accessToken = value.ToString().Replace("Bearer ", "");
 
         var handler = new JsonWebTokenHandler();
-        var jsonToken = handler.ReadJsonWebToken(idToken);
+        var jsonToken = handler.ReadJsonWebToken(accessToken);
 
         return jsonToken;
     }

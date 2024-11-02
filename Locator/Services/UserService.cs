@@ -4,17 +4,23 @@ using Locator.Repositories;
 
 namespace Locator.Services;
 
-internal class UserService(UserRepository userRepository, Auth0Service auth0Service)
+internal class UserService(
+    UserRepository userRepository,
+    RoleService roleService,
+    Auth0Service auth0Service
+)
 {
     public async Task<int> AddUser(AddUser addUser)
     {
         var accessToken = await auth0Service.GetAccessToken();
+
         var auth0Id = await auth0Service.CreateUser(
             accessToken,
             addUser.EmailAddress,
             addUser.FirstName,
             addUser.LastName
         );
+
         var userId = await userRepository.AddUser(
             addUser.FirstName,
             addUser.LastName,
@@ -23,11 +29,8 @@ internal class UserService(UserRepository userRepository, Auth0Service auth0Serv
             auth0Id
         );
 
-        // foreach (var role in roles)
-        // {
-        //     await roleService.AddUserRole(userId, role);
-        //     await auth0Service.AssignUserToRole(accessToken, auth0Id, role.Auth0RoleId);
-        // }
+        foreach (var role in addUser.Roles)
+            await roleService.AddUserRole(accessToken, userId, role.RoleId);
 
         return userId;
     }
@@ -73,7 +76,11 @@ internal class UserService(UserRepository userRepository, Auth0Service auth0Serv
             updateUser.UserStatus == UserStatus.Active
         );
 
-        // add/remove roles in this block here
+        foreach (var role in user.Roles)
+            await roleService.DeleteUserRole(accessToken, user.UserId, role.RoleId);
+
+        foreach (var role in updateUser.Roles)
+            await roleService.AddUserRole(accessToken, user.UserId, role.RoleId);
 
         await userRepository.UpdateUser(updateUser);
     }
@@ -97,10 +104,22 @@ internal class UserService(UserRepository userRepository, Auth0Service auth0Serv
         var accessToken = await auth0Service.GetAccessToken();
 
         var user = await userRepository.GetUser(auth0Id);
-        // foreach (var role in user.Roles)
-        //     await roleService.DeleteUserRole(user.UserId, role.RoleId);
+        foreach (var role in user.Roles)
+            await roleService.DeleteUserRole(accessToken, user.UserId, role.RoleId);
 
         await auth0Service.DeleteUser(accessToken, auth0Id);
         await userRepository.DeleteUser(auth0Id);
+    }
+
+    public async Task DeleteUser(int userId)
+    {
+        var accessToken = await auth0Service.GetAccessToken();
+
+        var user = await userRepository.GetUser(userId);
+        foreach (var role in user.Roles)
+            await roleService.DeleteUserRole(accessToken, user.UserId, role.RoleId);
+
+        await auth0Service.DeleteUser(accessToken, user.Auth0Id);
+        await userRepository.DeleteUser(user.UserId);
     }
 }

@@ -70,8 +70,8 @@ internal class RoleRepository(IDbConnection locatorDb)
             @$"
             update dbo.Role
             set
-                Name = @Name,
-                Description = @Description
+                Name = @RoleName,
+                Description = @RoleDescription
             where
                 RoleID = @RoleID",
             new
