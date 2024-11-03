@@ -353,7 +353,7 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
         public List<Scope> Scopes { get; set; }
     }
 
-    public async Task UpdatePermission(string accessToken, List<Permission> permissions)
+    public async Task UpdatePermissions(string accessToken, List<Permission> permissions)
     {
         using HttpClient client = new();
 
@@ -368,11 +368,9 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
                 }
             );
         }
-        ;
 
         var permissionRequest = new PermissionRequest { Scopes = scopes };
         string jsonContent = JsonConvert.SerializeObject(permissionRequest);
-        Console.WriteLine(jsonContent);
 
         var requestUri = $"{auth0Url}api/v2/resource-servers/64161f41068c02d3dfdfa97a"; //apiId need to store
         HttpRequestMessage request =
@@ -388,7 +386,58 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
 
         if (!response.IsSuccessStatusCode)
             throw new Exception($"Auth0 Exception. Failed to add permission: {responseString}");
+    }
 
-        Console.WriteLine(responseString);
+    public class PermissionX
+    {
+        [JsonProperty("permission_name")]
+        public string PermissionName { get; set; }
+
+        [JsonProperty("resource_server_identifier")]
+        public string ResourceServerIdentifier { get; set; }
+    }
+
+    public class RolePermissionRequest
+    {
+        [JsonProperty("permissions")]
+        public List<PermissionX> Permissions { get; set; } = new();
+    }
+
+    public async Task AddPermissionToRole(
+        string accessToken,
+        string permissionName,
+        string auth0RoleId
+    )
+    {
+        using HttpClient client = new();
+
+        // Create the payload with permissions
+        var rolePermissionRequest = new RolePermissionRequest
+        {
+            Permissions =
+            [
+                new PermissionX
+                {
+                    PermissionName = permissionName,
+                    ResourceServerIdentifier = "consultifi", // identifity for api
+                },
+            ],
+        };
+        string jsonContent = JsonConvert.SerializeObject(rolePermissionRequest);
+
+        var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}/permissions";
+        HttpRequestMessage request =
+            new(HttpMethod.Post, requestUri)
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
+            };
+
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await client.SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Auth0 Exception. Failed to add permission: {responseString}");
     }
 }

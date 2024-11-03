@@ -477,6 +477,19 @@ app.MapPost(
 
 #endregion
 
+#region Role Permission Endpoints
+
+app.MapPost(
+        "/addRolePermission",
+        async (int roleId, int permissionId) =>
+        {
+            await locator.AddRolePermission(roleId, permissionId);
+        }
+    )
+    .WithTags("Role Permission");
+
+#endregion
+
 
 app.MapGet(
         "/getStuff",

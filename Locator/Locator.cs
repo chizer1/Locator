@@ -24,6 +24,7 @@ public class LocatorLib()
     readonly ConnectionRepository _connectionRepository;
     readonly PermissionRepository _permissionRepository;
     readonly PermissionService _permissionService;
+    readonly RolePermissionRepository _rolePermissionRepository;
 
     public LocatorLib(
         IDbConnection locatorDb,
@@ -46,7 +47,13 @@ public class LocatorLib()
         _databaseServerRepository = new(locatorDb);
         _databaseTypeRepository = new(locatorDb);
         _permissionRepository = new(locatorDb);
-        _permissionService = new(_permissionRepository, _auth0Service);
+        _rolePermissionRepository = new(locatorDb);
+        _permissionService = new(
+            _permissionRepository,
+            _rolePermissionRepository,
+            _roleRepository,
+            _auth0Service
+        );
     }
 
     #region User
@@ -300,6 +307,11 @@ public class LocatorLib()
     public async Task AddPermission(string permissionName, string permissionDescription)
     {
         await _permissionService.AddPermission(permissionName, permissionDescription);
+    }
+
+    public async Task<int> AddRolePermission(int roleId, int permissionId)
+    {
+        return await _permissionService.AddRolePermission(roleId, permissionId);
     }
 
     #endregion

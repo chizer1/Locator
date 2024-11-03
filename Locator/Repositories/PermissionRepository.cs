@@ -42,10 +42,10 @@ internal class PermissionRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task<List<Permission>> GetRoles()
+    public async Task<List<Permission>> GetPermissions()
     {
         return (List<Permission>)
-            await locatorDb.QueryAsync<Role>(
+            await locatorDb.QueryAsync<Permission>(
                 @$"
                 select
                     PermissionID {nameof(Permission.PermissionId)},
