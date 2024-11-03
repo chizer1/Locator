@@ -9,7 +9,7 @@ createRoot(document.getElementById("root")).render(
     clientId="RCbDL6LnErLJfuXz1s3hvLf6bVJklNFl"
     authorizationParams={{
       audience: "consultifi",
-      scope: "openid profile email ConvisiAdmin",
+      scope: "openid profile email admin:read admin:write",
       redirect_uri: window.location.origin,
     }}
   >

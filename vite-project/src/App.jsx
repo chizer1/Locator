@@ -9,10 +9,9 @@ function App() {
 
   const randomApiCall = async () => {
     var accessToken = await getAccessTokenSilently();
-    alert(accessToken);
 
     const response = await fetch(
-      "http://localhost:5022/getStuff?clientId=3005&databaseTypeId=2",
+      "http://localhost:5022/getStuff?clientId=5005&databaseTypeId=22",
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,

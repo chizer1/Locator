@@ -69,8 +69,9 @@ builder
 
 builder
     .Services.AddAuthorizationBuilder()
-    .AddPolicy("ConvisiAdmin", policy => policy.RequireClaim("permissions", "ConvisiAdmin"));
-
+    .AddPolicy("admin:read", p => p.
+            RequireAuthenticatedUser().
+            RequireClaim("permissions", "admin:read"));
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
 var app = builder.Build();
@@ -437,9 +438,9 @@ app.MapDelete(
 
 app.MapPost(
         "/addConnection",
-        async (int clientId, int databaseId) =>
+        async (int clientUserId, int databaseId) =>
         {
-            return await locator.AddConnection(clientId, databaseId);
+            return await locator.AddConnection(clientUserId, databaseId);
         }
     )
     .WithTags("Connection");
@@ -503,6 +504,6 @@ app.MapGet(
         }
     )
     .WithTags("A Connection To Client DB")
-    .RequireAuthorization("ConvisiAdmin");
+    .RequireAuthorization("admin:read");
 
 app.Run();

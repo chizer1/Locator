@@ -36,7 +36,6 @@ public class LocatorLib()
     {
         _auth0Service = new(auth0Url, auth0ClientId, auth0ClientSecret);
         _roleRepository = new(locatorDb);
-        _roleService = new(_roleRepository, _userService, _userRoleRepository, _auth0Service);
         _userRepository = new(locatorDb);
         _userService = new(_userRepository, _roleService, _auth0Service);
         _userRoleRepository = new(locatorDb);
@@ -54,6 +53,7 @@ public class LocatorLib()
             _roleRepository,
             _auth0Service
         );
+        _roleService = new(_roleRepository, _userService, _userRoleRepository, _auth0Service);
     }
 
     #region User
