@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace Locator.Services;
 
 internal class Auth0Service(
-    string auth0Url,
+    string auth0Domain,
     string auth0ClientId,
     string auth0ClientSecret,
     string apiId,
@@ -21,12 +21,13 @@ internal class Auth0Service(
         {
             client_id = auth0ClientId,
             client_secret = auth0ClientSecret,
-            audience = $"{auth0Url}api/v2/",
+            audience = $"https://{auth0Domain}/api/v2/",
             grant_type = "client_credentials",
         };
         string jsonContent = JsonConvert.SerializeObject(requestData);
 
-        var requestUri = $"{auth0Url}oauth/token";
+        var requestUri = $"https://{auth0Domain}/oauth/token";
+        Console.WriteLine(requestUri);
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {
@@ -66,7 +67,7 @@ internal class Auth0Service(
         };
         string jsonContent = JsonConvert.SerializeObject(userMetadata);
 
-        var requestUri = $"{auth0Url}api/v2/users";
+        var requestUri = $"https://{auth0Domain}/api/v2/users";
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {
@@ -93,7 +94,7 @@ internal class Auth0Service(
         dynamic passwordData = new { connection = "Username-Password-Authentication", password };
         string jsonContent = JsonConvert.SerializeObject(passwordData);
 
-        var requestUri = $"{auth0Url}api/v2/users/{auth0Id}";
+        var requestUri = $"https://{auth0Domain}/api/v2/users/{auth0Id}";
         HttpRequestMessage request =
             new(HttpMethod.Patch, requestUri)
             {
@@ -131,7 +132,7 @@ internal class Auth0Service(
         };
         string jsonContent = JsonConvert.SerializeObject(userData);
 
-        var requestUri = $"{auth0Url}api/v2/users/{auth0Id}";
+        var requestUri = $"https://{auth0Domain}/api/v2/users/{auth0Id}";
         HttpRequestMessage request =
             new(HttpMethod.Patch, requestUri)
             {
@@ -153,7 +154,7 @@ internal class Auth0Service(
         dynamic role = new { roles = new[] { auth0RoleId } };
         string jsonContent = JsonConvert.SerializeObject(role);
 
-        var requestUri = $"{auth0Url}api/v2/users/{auth0Id}/roles";
+        var requestUri = $"https://{auth0Domain}/api/v2/users/{auth0Id}/roles";
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {
@@ -177,7 +178,7 @@ internal class Auth0Service(
         dynamic role = new { roles = new[] { auth0RoleId } };
         string jsonContent = JsonConvert.SerializeObject(role);
 
-        var requestUri = $"{auth0Url}api/v2/users/{auth0Id}/roles";
+        var requestUri = $"https://{auth0Domain}/api/v2/users/{auth0Id}/roles";
         HttpRequestMessage request =
             new(HttpMethod.Delete, requestUri)
             {
@@ -198,7 +199,7 @@ internal class Auth0Service(
     {
         using HttpClient client = new();
 
-        var requestUri = $"{auth0Url}api/v2/users/{auth0Id}";
+        var requestUri = $"https://{auth0Domain}/api/v2/users/{auth0Id}";
         HttpRequestMessage request = new(HttpMethod.Delete, requestUri);
         request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
@@ -213,7 +214,7 @@ internal class Auth0Service(
     {
         using HttpClient client = new();
 
-        var requestUri = $"{auth0Url}api/v2/users/{auth0Id}/logs";
+        var requestUri = $"https://{auth0Domain}/api/v2/users/{auth0Id}/logs";
         HttpRequestMessage request = new(HttpMethod.Get, requestUri);
         request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
@@ -256,7 +257,7 @@ internal class Auth0Service(
         dynamic passwordChangeData = new { user_id = auth0Id, result_url = clientUrl };
         string jsonContent = JsonConvert.SerializeObject(passwordChangeData);
 
-        var requestUri = $"{auth0Url}api/v2/tickets/password-change";
+        var requestUri = $"https://{auth0Domain}/api/v2/tickets/password-change";
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {
@@ -282,7 +283,7 @@ internal class Auth0Service(
         dynamic roleData = new { name, description };
         string jsonContent = JsonConvert.SerializeObject(roleData);
 
-        var requestUri = $"{auth0Url}api/v2/roles";
+        var requestUri = $"https://{auth0Domain}/api/v2/roles";
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {
@@ -303,7 +304,7 @@ internal class Auth0Service(
     {
         using HttpClient client = new();
 
-        var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}";
+        var requestUri = $"https://{auth0Domain}/api/v2/roles/{auth0RoleId}";
         HttpRequestMessage request = new(HttpMethod.Delete, requestUri);
 
         request.Headers.Add("Authorization", $"Bearer {accessToken}");
@@ -327,7 +328,7 @@ internal class Auth0Service(
         dynamic roleData = new { name, description };
         string jsonContent = JsonConvert.SerializeObject(roleData);
 
-        var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}";
+        var requestUri = $"https://{auth0Domain}/api/v2/roles/{auth0RoleId}";
         HttpRequestMessage request =
             new(HttpMethod.Patch, requestUri)
             {
@@ -361,7 +362,7 @@ internal class Auth0Service(
         var payload = new Dictionary<string, object> { ["scopes"] = scopes };
 
         string jsonContent = JsonConvert.SerializeObject(payload);
-        var requestUri = $"{auth0Url}api/v2/resource-servers/{apiId}";
+        var requestUri = $"https://{auth0Domain}/api/v2/resource-servers/{apiId}";
         HttpRequestMessage request =
             new(HttpMethod.Patch, requestUri)
             {
@@ -398,7 +399,7 @@ internal class Auth0Service(
         };
         string jsonContent = JsonConvert.SerializeObject(payload);
 
-        var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}/permissions";
+        var requestUri = $"https://{auth0Domain}/api/v2/roles/{auth0RoleId}/permissions";
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {

@@ -5,11 +5,11 @@ import { Auth0Provider } from "@auth0/auth0-react";
 
 createRoot(document.getElementById("root")).render(
   <Auth0Provider
-    domain="dev-xshhwrh4f1vis6lb.us.auth0.com"
-    clientId="RCbDL6LnErLJfuXz1s3hvLf6bVJklNFl"
+    domain="locatorlibrary.us.auth0.com" // tenant / domain
+    clientId="11Ufs1SfbMHqaNg1Pxm7Tdc1eQV7QciD" // spa app that it is connecting
     authorizationParams={{
-      audience: "consultifi",
-      scope: "openid profile email admin:read admin:write",
+      audience: "API", // custom api we want to connect to that has permissions available
+      scope: "openid profile email",
       redirect_uri: window.location.origin,
     }}
   >

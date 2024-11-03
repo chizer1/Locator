@@ -83,8 +83,8 @@ LocatorLib locator =
     new(
         builder.Configuration["LocatorDb:ConnectionString"],
         builder.Configuration["Auth0:Domain"],
-        builder.Configuration["Auth0:ApiExplorerApp:ClientID"],
-        builder.Configuration["Auth0:ApiExplorerApp:ClientSecret"],
+        builder.Configuration["Auth0:MachineToMachine:ClientID"],
+        builder.Configuration["Auth0:MachineToMachine:ClientSecret"],
         builder.Configuration["Auth0:ApiIdentifier"],
         builder.Configuration["Auth0:ApiAudience"]
     );
@@ -92,7 +92,7 @@ LocatorLib locator =
 app.Use(
     async (context, next) =>
     {
-        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+        //context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
         await next();
     }
