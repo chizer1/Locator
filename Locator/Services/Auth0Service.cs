@@ -1,13 +1,17 @@
-using System.Dynamic;
 using System.Text;
-using System.Text.Json.Serialization;
 using Locator.Models.Read;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Locator.Services;
 
-internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0ClientSecret)
+internal class Auth0Service(
+    string auth0Url,
+    string auth0ClientId,
+    string auth0ClientSecret,
+    string apiId,
+    string apiIdentifier
+)
 {
     public async Task<string> GetAccessToken()
     {
@@ -338,41 +342,26 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
             throw new Exception($"Auth0 Exception. Failed to update role: {responseString}");
     }
 
-    private class Scope
-    {
-        [JsonProperty("value")]
-        public string Value { get; set; }
-
-        [JsonProperty("description")]
-        public string Description { get; set; }
-    }
-
-    private class PermissionRequest
-    {
-        [JsonProperty("scopes")]
-        public List<Scope> Scopes { get; set; }
-    }
-
     public async Task UpdatePermissions(string accessToken, List<Permission> permissions)
     {
         using HttpClient client = new();
 
-        var scopes = new List<Scope>();
+        var scopes = new List<Dictionary<string, string>>();
         foreach (var permission in permissions)
         {
             scopes.Add(
-                new Scope
+                new Dictionary<string, string>
                 {
-                    Value = permission.PermissionName,
-                    Description = permission.PermissionDescription,
+                    ["value"] = permission.PermissionName,
+                    ["description"] = permission.PermissionDescription,
                 }
             );
         }
 
-        var permissionRequest = new PermissionRequest { Scopes = scopes };
-        string jsonContent = JsonConvert.SerializeObject(permissionRequest);
+        var payload = new Dictionary<string, object> { ["scopes"] = scopes };
 
-        var requestUri = $"{auth0Url}api/v2/resource-servers/64161f41068c02d3dfdfa97a"; //apiId need to store
+        string jsonContent = JsonConvert.SerializeObject(payload);
+        var requestUri = $"{auth0Url}api/v2/resource-servers/{apiId}";
         HttpRequestMessage request =
             new(HttpMethod.Patch, requestUri)
             {
@@ -388,21 +377,6 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
             throw new Exception($"Auth0 Exception. Failed to add permission: {responseString}");
     }
 
-    public class PermissionX
-    {
-        [JsonProperty("permission_name")]
-        public string PermissionName { get; set; }
-
-        [JsonProperty("resource_server_identifier")]
-        public string ResourceServerIdentifier { get; set; }
-    }
-
-    public class RolePermissionRequest
-    {
-        [JsonProperty("permissions")]
-        public List<PermissionX> Permissions { get; set; } = new();
-    }
-
     public async Task AddPermissionToRole(
         string accessToken,
         string permissionName,
@@ -411,19 +385,18 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
     {
         using HttpClient client = new();
 
-        // Create the payload with permissions
-        var rolePermissionRequest = new RolePermissionRequest
+        var payload = new Dictionary<string, object>
         {
-            Permissions =
-            [
-                new PermissionX
+            ["permissions"] = new List<Dictionary<string, string>>
+            {
+                new()
                 {
-                    PermissionName = permissionName,
-                    ResourceServerIdentifier = "consultifi", // identifity for api
+                    ["permission_name"] = permissionName,
+                    ["resource_server_identifier"] = apiIdentifier,
                 },
-            ],
+            },
         };
-        string jsonContent = JsonConvert.SerializeObject(rolePermissionRequest);
+        string jsonContent = JsonConvert.SerializeObject(payload);
 
         var requestUri = $"{auth0Url}api/v2/roles/{auth0RoleId}/permissions";
         HttpRequestMessage request =

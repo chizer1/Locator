@@ -1,4 +1,3 @@
-using System.Data;
 using System.Data.SqlClient;
 using Locator.Models.Read;
 using Locator.Models.Write;
@@ -27,14 +26,18 @@ public class LocatorLib()
     readonly RolePermissionRepository _rolePermissionRepository;
 
     public LocatorLib(
-        IDbConnection locatorDb,
+        string locatorDbConnectionString,
         string auth0Url,
         string auth0ClientId,
-        string auth0ClientSecret
+        string auth0ClientSecret,
+        string apiId,
+        string apiIdentifier
     )
         : this()
     {
-        _auth0Service = new(auth0Url, auth0ClientId, auth0ClientSecret);
+        var locatorDb = new SqlConnection(locatorDbConnectionString);
+
+        _auth0Service = new(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
         _roleRepository = new(locatorDb);
         _userRepository = new(locatorDb);
         _userService = new(_userRepository, _roleService, _auth0Service);

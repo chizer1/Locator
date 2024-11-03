@@ -1,18 +1,9 @@
-using System.Data.SqlClient;
 using Dapper;
 using Locator;
 using Locator.Models.Write;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
-
-LocatorLib locator =
-    new(
-        new SqlConnection("Server=localhost;Database=Locator;User Id=sa;Password=1StrongPwd!!;"),
-        "https://dev-xshhwrh4f1vis6lb.us.auth0.com/",
-        "jKKTFQ4MZxKBFPp1FKpYI9pJ2GjUIlUy", // system api
-        "kVKz_utS1772u_0kE39YCheF6Whiz8HB_E1jN8goxFmAXtmQoW8VAQbAkkj0glyh" // system api
-    );
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,14 +55,15 @@ builder
     .AddJwtBearer(options =>
     {
         options.Authority = domain;
-        options.Audience = builder.Configuration["Auth0:Audience"];
+        options.Audience = builder.Configuration["Auth0:ApiAudience"];
     });
 
 builder
     .Services.AddAuthorizationBuilder()
-    .AddPolicy("admin:read", p => p.
-            RequireAuthenticatedUser().
-            RequireClaim("permissions", "admin:read"));
+    .AddPolicy(
+        "admin:read",
+        p => p.RequireAuthenticatedUser().RequireClaim("permissions", "admin:read")
+    );
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
 var app = builder.Build();
@@ -87,10 +79,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+LocatorLib locator =
+    new(
+        builder.Configuration["LocatorDb:ConnectionString"],
+        builder.Configuration["Auth0:Domain"],
+        builder.Configuration["Auth0:ApiExplorerApp:ClientID"],
+        builder.Configuration["Auth0:ApiExplorerApp:ClientSecret"],
+        builder.Configuration["Auth0:ApiIdentifier"],
+        builder.Configuration["Auth0:ApiAudience"]
+    );
+
 app.Use(
     async (context, next) =>
     {
-        //context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
         await next();
     }
