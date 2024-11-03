@@ -91,7 +91,6 @@ internal class RoleService(
 
     public async Task DeleteUserRole(string accessToken, int userId, int roleId)
     {
-        ;
         var user = await userService.GetUser(userId);
         var role = await GetRole(roleId);
 

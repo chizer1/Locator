@@ -464,6 +464,20 @@ app.MapDelete(
 
 #endregion
 
+#region Permission Endpoints
+
+app.MapPost(
+        "/addPermission",
+        async (string permissionName, string permissionDescription) =>
+        {
+            await locator.AddPermission(permissionName, permissionDescription);
+        }
+    )
+    .WithTags("Permission");
+
+#endregion
+
+
 app.MapGet(
         "/getStuff",
         async (HttpRequest request, int clientId, int databaseTypeId) =>

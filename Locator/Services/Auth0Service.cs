@@ -1,4 +1,6 @@
+using System.Dynamic;
 using System.Text;
+using System.Text.Json.Serialization;
 using Locator.Models.Read;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -334,5 +336,59 @@ internal class Auth0Service(string auth0Url, string auth0ClientId, string auth0C
 
         if (!response.IsSuccessStatusCode)
             throw new Exception($"Auth0 Exception. Failed to update role: {responseString}");
+    }
+
+    private class Scope
+    {
+        [JsonProperty("value")]
+        public string Value { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+    }
+
+    private class PermissionRequest
+    {
+        [JsonProperty("scopes")]
+        public List<Scope> Scopes { get; set; }
+    }
+
+    public async Task UpdatePermission(string accessToken, List<Permission> permissions)
+    {
+        using HttpClient client = new();
+
+        var scopes = new List<Scope>();
+        foreach (var permission in permissions)
+        {
+            scopes.Add(
+                new Scope
+                {
+                    Value = permission.PermissionName,
+                    Description = permission.PermissionDescription,
+                }
+            );
+        }
+        ;
+
+        var permissionRequest = new PermissionRequest { Scopes = scopes };
+        string jsonContent = JsonConvert.SerializeObject(permissionRequest);
+        Console.WriteLine(jsonContent);
+
+        var requestUri = $"{auth0Url}api/v2/resource-servers/64161f41068c02d3dfdfa97a"; //apiId need to store
+        HttpRequestMessage request =
+            new(HttpMethod.Patch, requestUri)
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
+            };
+
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await client.SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Auth0 Exception. Failed to add permission: {responseString}");
+
+        Console.WriteLine(responseString);
     }
 }

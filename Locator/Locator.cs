@@ -22,6 +22,8 @@ public class LocatorLib()
     readonly RoleRepository _roleRepository;
     readonly RoleService _roleService;
     readonly ConnectionRepository _connectionRepository;
+    readonly PermissionRepository _permissionRepository;
+    readonly PermissionService _permissionService;
 
     public LocatorLib(
         IDbConnection locatorDb,
@@ -43,6 +45,8 @@ public class LocatorLib()
         _databaseRepository = new(locatorDb);
         _databaseServerRepository = new(locatorDb);
         _databaseTypeRepository = new(locatorDb);
+        _permissionRepository = new(locatorDb);
+        _permissionService = new(_permissionRepository, _auth0Service);
     }
 
     #region User
@@ -291,6 +295,14 @@ public class LocatorLib()
 
     #endregion
 
+    #region Permission
+
+    public async Task AddPermission(string permissionName, string permissionDescription)
+    {
+        await _permissionService.AddPermission(permissionName, permissionDescription);
+    }
+
+    #endregion
     public string GetAuth0Id(HttpContext httpContext)
     {
         return HttpContextUtilities.GetAuth0Id(httpContext);
