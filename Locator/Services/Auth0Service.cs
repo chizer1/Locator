@@ -27,7 +27,6 @@ internal class Auth0Service(
         string jsonContent = JsonConvert.SerializeObject(requestData);
 
         var requestUri = $"https://{auth0Domain}/oauth/token";
-        Console.WriteLine(requestUri);
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {

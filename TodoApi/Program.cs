@@ -92,7 +92,7 @@ LocatorLib locator =
 app.Use(
     async (context, next) =>
     {
-        //context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
         await next();
     }

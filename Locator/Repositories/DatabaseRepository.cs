@@ -40,6 +40,8 @@ internal class DatabaseRepository(IDbConnection locatorDb)
         );
 
         // data reader / data writer permissions?
+        // USE IndigoWildSoap;
+        // GRANT SELECT TO [YourUserName];
 
         await locatorDb.ExecuteAsync(@$"create database {addDatabase.DatabaseName}");
         await locatorDb.ExecuteAsync(

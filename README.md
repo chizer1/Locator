@@ -24,3 +24,7 @@ How to setup Auth0
     - create:roles
     - delete: roles
     - update: roles
+  - Resource Server
+    - update:resource_servers
+
+  RBAC needs to be enabled on custom api
