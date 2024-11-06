@@ -6,9 +6,9 @@ The purpose of the app is to help generate SQL server connections depending on A
 
 Folders from the root:
 
-Locator - the class library that would be a reusable nuget package
-API - minimal api implenting the methods from the Locator class library
-Client - React app using auth0 npm package, calling the above minimal api
+1. Locator - the class library that would be a reusable nuget package
+2. API - minimal api implenting the methods from the Locator class library
+3. Client - React app using auth0 npm package, calling the above minimal api
 
 SETUP
 
@@ -40,11 +40,11 @@ How to setup your Auth0 tenant (or use what I saved already)
   How to setup database
 
   1. For local development you can spin up a local SQL server instance with Docker 
-   - Run docker compose up from root of repository
+      - Run `docker compose up` from root of repository
   2. Use SchemaZen to create the Locator database locally
-    - dotnet schemazen script --server localhost --u sa --p '1StrongPwd!!' --database 'Locator' --scriptDir '\Locator\SQL\Schema\'
+      - `dotnet schemazen script --server localhost --u sa --p '1StrongPwd!!' --database 'Locator' --scriptDir '\Locator\SQL\Schema\'`
   3. Populate a couple of lookup tables
-    - Execute \Locator\SQL\Scripts\Seed.sql on your newly created LocatorDB
+      - Execute `\Locator\SQL\Scripts\Seed.sql` on your newly created LocatorDB
 
 GET BASIC EXAMPLE WORKING
 
