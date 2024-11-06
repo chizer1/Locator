@@ -89,10 +89,12 @@ LocatorLib locator =
         builder.Configuration["Auth0:ApiAudience"]
     );
 
+// middle ware
 app.Use(
     async (context, next) =>
     {
-        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+        // uncomment below line for getting user context from token
+        //context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
         await next();
     }
@@ -494,6 +496,7 @@ app.MapPost(
 #endregion
 
 
+// user is signed in, hitting an endpoint with the admin:read permission, permission they setup through the library
 app.MapGet(
         "/getStuff",
         async (HttpRequest request, int clientId, int databaseTypeId) =>
@@ -502,6 +505,7 @@ app.MapGet(
 
             var db = await locator.GetConnection(auth0Id, clientId, databaseTypeId);
 
+            // this would be database the library consumer would have setup, don't care what they put into it
             return await db.QueryAsync<dynamic>("SELECT * FROM dbo.Stuff");
         }
     )

@@ -39,9 +39,9 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             }
         );
 
-        // data reader / data writer permissions?
-        // USE IndigoWildSoap;
-        // GRANT SELECT TO [YourUserName];
+        await locatorDb.ExecuteAsync(
+            @$"create login {addDatabase.DatabaseUser} with password = 'Skyline-Armory-Paramount3-Shut'"
+        );
 
         await locatorDb.ExecuteAsync(@$"create database {addDatabase.DatabaseName}");
         await locatorDb.ExecuteAsync(
@@ -51,6 +51,13 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             @$"
             use {addDatabase.DatabaseName}
             create user {addDatabase.DatabaseUser} for login {addDatabase.DatabaseUser}"
+        );
+
+        // need other grants / permissions here?
+        await locatorDb.ExecuteAsync(
+            @$"
+            use {addDatabase.DatabaseName}
+            grant select to {addDatabase.DatabaseUser}"
         );
 
         return databaseId;
