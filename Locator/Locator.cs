@@ -9,21 +9,15 @@ namespace Locator;
 
 public class LocatorLib()
 {
-    readonly Auth0Service _auth0Service;
-    readonly ClientRepository _clientRepository;
-    readonly ClientUserRepository _clientUserRepository;
-    readonly UserRepository _userRepository;
-    readonly UserService _userService;
-    readonly UserRoleRepository _userRoleRepository;
-    readonly DatabaseRepository _databaseRepository;
-    readonly DatabaseServerRepository _databaseServerRepository;
-    readonly DatabaseTypeRepository _databaseTypeRepository;
-    readonly RoleRepository _roleRepository;
-    readonly RoleService _roleService;
-    readonly ConnectionRepository _connectionRepository;
-    readonly PermissionRepository _permissionRepository;
-    readonly PermissionService _permissionService;
-    readonly RolePermissionRepository _rolePermissionRepository;
+    private readonly ClientRepository _clientRepository;
+    private readonly ClientUserRepository _clientUserRepository;
+    private readonly UserService _userService;
+    private readonly DatabaseRepository _databaseRepository;
+    private readonly DatabaseServerRepository _databaseServerRepository;
+    private readonly DatabaseTypeRepository _databaseTypeRepository;
+    private readonly RoleService _roleService;
+    private readonly ConnectionRepository _connectionRepository;
+    private readonly PermissionService _permissionService;
 
     public LocatorLib(
         string locatorDbConnectionString,
@@ -37,68 +31,114 @@ public class LocatorLib()
     {
         var locatorDb = new SqlConnection(locatorDbConnectionString);
 
-        _auth0Service = new(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
-        _roleRepository = new(locatorDb);
-        _userRepository = new(locatorDb);
-        _userService = new(_userRepository, _roleService, _auth0Service);
-        _userRoleRepository = new(locatorDb);
-        _clientRepository = new(locatorDb);
-        _clientUserRepository = new(locatorDb);
-        _connectionRepository = new(locatorDb);
-        _databaseRepository = new(locatorDb);
-        _databaseServerRepository = new(locatorDb);
-        _databaseTypeRepository = new(locatorDb);
-        _permissionRepository = new(locatorDb);
-        _rolePermissionRepository = new(locatorDb);
-        _permissionService = new(
-            _permissionRepository,
-            _rolePermissionRepository,
-            _roleRepository,
-            _auth0Service
+        Auth0Service auth0Service =
+            new(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
+        RoleRepository roleRepository = new(locatorDb);
+        UserRepository userRepository = new(locatorDb);
+        _userService = new UserService(userRepository, _roleService, auth0Service);
+        UserRoleRepository userRoleRepository = new(locatorDb);
+        _clientRepository = new ClientRepository(locatorDb);
+        _clientUserRepository = new ClientUserRepository(locatorDb);
+        _connectionRepository = new ConnectionRepository(locatorDb);
+        _databaseRepository = new DatabaseRepository(locatorDb);
+        _databaseServerRepository = new DatabaseServerRepository(locatorDb);
+        _databaseTypeRepository = new DatabaseTypeRepository(locatorDb);
+        PermissionRepository permissionRepository = new(locatorDb);
+        RolePermissionRepository rolePermissionRepository = new(locatorDb);
+        _permissionService = new PermissionService(
+            permissionRepository,
+            rolePermissionRepository,
+            roleRepository,
+            auth0Service
         );
-        _roleService = new(_roleRepository, _userService, _userRoleRepository, _auth0Service);
+        _roleService = new RoleService(
+            roleRepository,
+            _userService,
+            userRoleRepository,
+            auth0Service
+        );
     }
 
     #region User
 
+    /// <summary>
+    /// Add user to locator database and Auth0 tenant
+    /// </summary>
     public async Task<int> AddUser(AddUser addUser)
     {
         return await _userService.AddUser(addUser);
     }
 
+    /// <summary>
+    /// Get user information from locator database
+    /// </summary>
     public async Task<User> GetUser(string auth0Id)
     {
         return await _userService.GetUser(auth0Id);
     }
 
+    /// <summary>
+    /// Get user information from locator database
+    /// </summary>
     public async Task<User> GetUser(int userId)
     {
         return await _userService.GetUser(userId);
     }
 
+    /// <summary>
+    /// Get users from locator database
+    /// </summary>
     public async Task<List<User>> GetUsers()
     {
         return await _userService.GetUsers();
     }
 
+    /// <summary>
+    /// Get users from locator database with search text and pagination
+    /// </summary>
     public async Task<PagedList<User>> GetUsers(string searchText, int page, int pageSize)
     {
         return await _userService.GetUsers(searchText, page, pageSize);
     }
 
+    /// <summary>
+    /// Get recent user activity from Auth0
+    /// </summary>
     public async Task<List<UserLog>> GetUserLogs(string auth0Id)
     {
         return await _userService.GetUserLogs(auth0Id);
     }
 
+    /// <summary>
+    /// Get recent user activity from Auth0
+    /// </summary>
+    public async Task<List<UserLog>> GetUserLogs(int userId)
+    {
+        return await _userService.GetUserLogs(userId);
+    }
+
+    /// <summary>
+    /// Update user information in locator database and Auth0 tenant
+    /// </summary>
     public async Task UpdateUser(UpdateUser updateUser)
     {
         await _userService.UpdateUser(updateUser);
     }
 
+    /// <summary>
+    /// Delete user from locator database and Auth0 tenant
+    /// </summary>
     public async Task DeleteUser(string auth0Id)
     {
         await _userService.DeleteUser(auth0Id);
+    }
+
+    /// <summary>
+    /// Delete user from locator database and Auth0 tenant
+    /// </summary>
+    public async Task DeleteUser(int userId)
+    {
+        await _userService.DeleteUser(userId);
     }
 
     #endregion

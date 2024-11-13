@@ -46,7 +46,7 @@ var configBuilder = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
-var configuration = configBuilder.Build();
+configBuilder.Build();
 
 var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
 
@@ -94,7 +94,7 @@ app.Use(
     async (context, next) =>
     {
         // uncomment below line for getting user context from token
-        //context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
         await next();
     }
@@ -102,147 +102,53 @@ app.Use(
 
 #region User Endpoints
 
-app.MapPost(
-        "/addUser",
-        async (AddUser addUser) =>
-        {
-            return await locator.AddUser(addUser);
-        }
-    )
+app.MapPost("/addUser", async (AddUser addUser) => await locator.AddUser(addUser)).WithTags("User");
+
+app.MapGet("/getUser", async (int userId) => await locator.GetUser(userId)).WithTags("User");
+
+app.MapGet("/getUsers", async () => await locator.GetUsers()).WithTags("User");
+
+app.MapPut("/updateUser", async (UpdateUser updateUser) => await locator.UpdateUser(updateUser))
     .WithTags("User");
 
-app.MapGet(
-        "/getUser",
-        async (int userId) =>
-        {
-            return await locator.GetUser(userId);
-        }
-    )
-    .WithTags("User");
-
-app.MapGet(
-        "/getUsers",
-        async () =>
-        {
-            return await locator.GetUsers();
-        }
-    )
-    .WithTags("User");
-
-app.MapPut(
-        "/updateUser",
-        async (UpdateUser updateUser) =>
-        {
-            await locator.UpdateUser(updateUser);
-        }
-    )
-    .WithTags("User");
-
-app.MapDelete(
-        "/deleteUser",
-        async (string auth0Id) =>
-        {
-            await locator.DeleteUser(auth0Id);
-        }
-    )
+app.MapDelete("/deleteUser", async (string auth0Id) => await locator.DeleteUser(auth0Id))
     .WithTags("User");
 
 #endregion
 
 #region Client Endpoints
 
-app.MapPost(
-        "/addClient",
-        async (AddClient addClient) =>
-        {
-            return await locator.AddClient(addClient);
-        }
-    )
+app.MapPost("/addClient", async (AddClient addClient) => await locator.AddClient(addClient))
     .WithTags("Client");
 
-app.MapGet(
-        "/getClient",
-        async (int clientId) =>
-        {
-            return await locator.GetClient(clientId);
-        }
-    )
+app.MapGet("/getClient", async (int clientId) => await locator.GetClient(clientId))
     .WithTags("Client");
 
-app.MapGet(
-        "/getClients",
-        async () =>
-        {
-            return await locator.GetClients();
-        }
-    )
-    .WithTags("Client");
+app.MapGet("/getClients", async () => await locator.GetClients()).WithTags("Client");
 
 app.MapPut(
         "/updateClient",
-        async (UpdateClient updateClient) =>
-        {
-            await locator.UpdateClient(updateClient);
-        }
+        async (UpdateClient updateClient) => await locator.UpdateClient(updateClient)
     )
     .WithTags("Client");
 
-app.MapDelete(
-        "/deleteClient",
-        async (int clientId) =>
-        {
-            await locator.DeleteClient(clientId);
-        }
-    )
+app.MapDelete("/deleteClient", async (int clientId) => await locator.DeleteClient(clientId))
     .WithTags("Client");
 
 #endregion
 
 #region Role Endpoints
 
-app.MapPost(
-        "/addRole",
-        async (AddRole addRole) =>
-        {
-            return await locator.AddRole(addRole);
-        }
-    )
+app.MapPost("/addRole", async (AddRole addRole) => await locator.AddRole(addRole)).WithTags("Role");
+
+app.MapGet("/getRole", async (int roleId) => await locator.GetRole(roleId)).WithTags("Role");
+
+app.MapGet("/getRoles", async () => await locator.GetRoles()).WithTags("Role");
+
+app.MapPut("/updateRole", async (UpdateRole updateRole) => await locator.UpdateRole(updateRole))
     .WithTags("Role");
 
-app.MapGet(
-        "/getRole",
-        async (int roleId) =>
-        {
-            return await locator.GetRole(roleId);
-        }
-    )
-    .WithTags("Role");
-
-app.MapGet(
-        "/getRoles",
-        async () =>
-        {
-            return await locator.GetRoles();
-        }
-    )
-    .WithTags("Role");
-
-app.MapPut(
-        "/updateRole",
-        async (UpdateRole updateRole) =>
-        {
-            await locator.UpdateRole(updateRole);
-        }
-    )
-    .WithTags("Role");
-
-app.MapDelete(
-        "/deleteRole",
-        async (int roleId) =>
-        {
-            await locator.DeleteRole(roleId);
-        }
-    )
+app.MapDelete("/deleteRole", async (int roleId) => await locator.DeleteRole(roleId))
     .WithTags("Role");
 
 #endregion
@@ -251,19 +157,13 @@ app.MapDelete(
 
 app.MapPost(
         "/addUserRole",
-        async (int userId, int roleId) =>
-        {
-            return await locator.AddUserRole(userId, roleId);
-        }
+        async (int userId, int roleId) => await locator.AddUserRole(userId, roleId)
     )
     .WithTags("UserRole");
 
 app.MapDelete(
         "/deleteUserRole",
-        async (int userId, int roleId) =>
-        {
-            await locator.DeleteUserRole(userId, roleId);
-        }
+        async (int userId, int roleId) => await locator.DeleteUserRole(userId, roleId)
     )
     .WithTags("UserRole");
 
@@ -273,19 +173,13 @@ app.MapDelete(
 
 app.MapPost(
         "/addClientUser",
-        async (int clientId, int userId) =>
-        {
-            return await locator.AddClientUser(clientId, userId);
-        }
+        async (int clientId, int userId) => await locator.AddClientUser(clientId, userId)
     )
     .WithTags("ClientUser");
 
 app.MapDelete(
         "/deleteClientUser",
-        async (int clientId, int userId) =>
-        {
-            await locator.DeleteClientUser(clientId, userId);
-        }
+        async (int clientId, int userId) => await locator.DeleteClientUser(clientId, userId)
     )
     .WithTags("ClientUser");
 
@@ -296,45 +190,26 @@ app.MapDelete(
 app.MapPost(
         "/addDatabaseServer",
         async (AddDatabaseServer addDatabaseServer) =>
-        {
-            return await locator.AddDatabaseServer(addDatabaseServer);
-        }
+            await locator.AddDatabaseServer(addDatabaseServer)
     )
     .WithTags("DatabaseServer");
 
-app.MapGet(
-        "/getDatabaseServer",
-        async (int serverId) =>
-        {
-            return await locator.GetDatabaseServer(serverId);
-        }
-    )
+app.MapGet("/getDatabaseServer", async (int serverId) => await locator.GetDatabaseServer(serverId))
     .WithTags("DatabaseServer");
 
-app.MapGet(
-        "/getDatabaseServers",
-        async () =>
-        {
-            return await locator.GetDatabaseServers();
-        }
-    )
+app.MapGet("/getDatabaseServers", async () => await locator.GetDatabaseServers())
     .WithTags("DatabaseServer");
 
 app.MapPut(
         "/updateDatabaseServer",
         async (UpdateDatabaseServer updateDatabaseServer) =>
-        {
-            await locator.UpdateDatabaseServer(updateDatabaseServer);
-        }
+            await locator.UpdateDatabaseServer(updateDatabaseServer)
     )
     .WithTags("DatabaseServer");
 
 app.MapDelete(
         "/deleteDatabaseServer",
-        async (int serverId) =>
-        {
-            await locator.DeleteDatabaseServer(serverId);
-        }
+        async (int serverId) => await locator.DeleteDatabaseServer(serverId)
     )
     .WithTags("DatabaseServer");
 
@@ -344,95 +219,50 @@ app.MapDelete(
 
 app.MapPost(
         "/addDatabase",
-        async (AddDatabase addDatabase) =>
-        {
-            return await locator.AddDatabase(addDatabase);
-        }
+        async (AddDatabase addDatabase) => await locator.AddDatabase(addDatabase)
     )
     .WithTags("Database");
 
-app.MapGet(
-        "/getDatabase",
-        async (int databaseId) =>
-        {
-            return await locator.GetDatabase(databaseId);
-        }
-    )
+app.MapGet("/getDatabase", async (int databaseId) => await locator.GetDatabase(databaseId))
     .WithTags("Database");
 
-app.MapGet(
-        "/getDatabases",
-        async () =>
-        {
-            return await locator.GetDatabases();
-        }
-    )
-    .WithTags("Database");
+app.MapGet("/getDatabases", async () => await locator.GetDatabases()).WithTags("Database");
 
 app.MapPut(
         "/updateDatabase",
-        async (UpdateDatabase updateDatabase) =>
-        {
-            await locator.UpdateDatabase(updateDatabase);
-        }
+        async (UpdateDatabase updateDatabase) => await locator.UpdateDatabase(updateDatabase)
     )
     .WithTags("Database");
 
-app.MapDelete(
-        "/deleteDatabase",
-        async (int databaseId) =>
-        {
-            await locator.DeleteDatabase(databaseId);
-        }
-    )
+app.MapDelete("/deleteDatabase", async (int databaseId) => await locator.DeleteDatabase(databaseId))
     .WithTags("Database");
 
 #endregion
 
 #region Database Type Endpoints
 
-app.MapPost(
-        "/addDatabaseType",
-        async (string name) =>
-        {
-            return await locator.AddDatabaseType(name);
-        }
-    )
+app.MapPost("/addDatabaseType", async (string name) => await locator.AddDatabaseType(name))
     .WithTags("DatabaseType");
 
 app.MapGet(
         "/getDatabaseType",
-        async (int databaseTypeId) =>
-        {
-            return await locator.GetDatabaseType(databaseTypeId);
-        }
+        async (int databaseTypeId) => await locator.GetDatabaseType(databaseTypeId)
     )
     .WithTags("DatabaseType");
 
-app.MapGet(
-        "/getDatabaseTypes",
-        async () =>
-        {
-            return await locator.GetDatabaseTypes();
-        }
-    )
+app.MapGet("/getDatabaseTypes", async () => await locator.GetDatabaseTypes())
     .WithTags("DatabaseType");
 
 app.MapPut(
         "/updateDatabaseType",
         async (int databaseTypeId, string name) =>
-        {
-            await locator.UpdateDatabaseType(databaseTypeId, name);
-        }
+            await locator.UpdateDatabaseType(databaseTypeId, name)
     )
     .WithTags("DatabaseType");
 
 app.MapDelete(
         "/deleteDatabaseType",
-        async (int databaseTypeId) =>
-        {
-            await locator.DeleteDatabaseType(databaseTypeId);
-        }
+        async (int databaseTypeId) => await locator.DeleteDatabaseType(databaseTypeId)
     )
     .WithTags("DatabaseType");
 
@@ -443,27 +273,16 @@ app.MapDelete(
 app.MapPost(
         "/addConnection",
         async (int clientUserId, int databaseId) =>
-        {
-            return await locator.AddConnection(clientUserId, databaseId);
-        }
+            await locator.AddConnection(clientUserId, databaseId)
     )
     .WithTags("Connection");
 
-app.MapGet(
-        "/getConnection",
-        async (int connectionId) =>
-        {
-            return await locator.GetConnection(connectionId);
-        }
-    )
+app.MapGet("/getConnection", async (int connectionId) => await locator.GetConnection(connectionId))
     .WithTags("Connection");
 
 app.MapDelete(
         "/deleteConnection",
-        async (int clientId, int databaseId) =>
-        {
-            await locator.DeleteConnection(clientId, databaseId);
-        }
+        async (int clientId, int databaseId) => await locator.DeleteConnection(clientId, databaseId)
     )
     .WithTags("Connection");
 
@@ -474,9 +293,7 @@ app.MapDelete(
 app.MapPost(
         "/addPermission",
         async (string permissionName, string permissionDescription) =>
-        {
-            await locator.AddPermission(permissionName, permissionDescription);
-        }
+            await locator.AddPermission(permissionName, permissionDescription)
     )
     .WithTags("Permission");
 
@@ -487,9 +304,7 @@ app.MapPost(
 app.MapPost(
         "/addRolePermission",
         async (int roleId, int permissionId) =>
-        {
-            await locator.AddRolePermission(roleId, permissionId);
-        }
+            await locator.AddRolePermission(roleId, permissionId)
     )
     .WithTags("Role Permission");
 

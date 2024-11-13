@@ -74,11 +74,10 @@ internal class UserRepository(IDbConnection locatorDb)
             {
                 user.Roles ??= [];
 
-                if (role != null)
-                {
-                    if (!user.Roles.Any(r => r.RoleId == role.RoleId))
-                        user.Roles.Add(role);
-                }
+                if (role == null)
+                    return user;
+                if (user.Roles.All(r => r.RoleId != role.RoleId))
+                    user.Roles.Add(role);
 
                 return user;
             },
@@ -117,7 +116,7 @@ internal class UserRepository(IDbConnection locatorDb)
 
                 if (role != null)
                 {
-                    if (!user.Roles.Any(r => r.RoleId == role.RoleId))
+                    if (user.Roles.All(r => r.RoleId != role.RoleId))
                         user.Roles.Add(role);
                 }
 
@@ -187,8 +186,8 @@ internal class UserRepository(IDbConnection locatorDb)
             }
         );
 
-        int rowCount = results.Read<int>().First();
-        return new(
+        var rowCount = results.Read<int>().First();
+        return new PagedList<User>(
             results.Read<User>().ToList(),
             rowCount,
             pageNumber,

@@ -124,8 +124,8 @@ internal class DatabaseRepository(IDbConnection locatorDb)
             }
         );
 
-        int rowCount = results.Read<int>().First();
-        return new(
+        var rowCount = results.Read<int>().First();
+        return new PagedList<Database>(
             results.Read<Database>().ToList(),
             rowCount,
             pageNumber,

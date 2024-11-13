@@ -18,7 +18,8 @@ internal class UserService(
             accessToken,
             addUser.EmailAddress,
             addUser.FirstName,
-            addUser.LastName
+            addUser.LastName,
+            addUser.Password
         );
 
         var userId = await userRepository.AddUser(
@@ -60,6 +61,15 @@ internal class UserService(
         var accessToken = await auth0Service.GetAccessToken();
 
         return await auth0Service.GetUserLogs(accessToken, auth0Id);
+    }
+
+    public async Task<List<UserLog>> GetUserLogs(int userId)
+    {
+        var accessToken = await auth0Service.GetAccessToken();
+
+        var user = await userRepository.GetUser(userId);
+
+        return await auth0Service.GetUserLogs(accessToken, user.Auth0Id);
     }
 
     public async Task UpdateUser(UpdateUser updateUser)

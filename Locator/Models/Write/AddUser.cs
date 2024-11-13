@@ -3,20 +3,30 @@ using Locator.Models.Read;
 
 namespace Locator.Models.Write;
 
-public class AddUser
+public abstract class AddUser(
+    List<Role> roles,
+    string firstName,
+    string lastName,
+    string emailAddress,
+    string password,
+    UserStatus userStatus
+)
 {
     [Required]
-    public string FirstName { get; set; }
+    public string FirstName { get; } = firstName;
 
     [Required]
-    public string LastName { get; set; }
+    public string LastName { get; } = lastName;
 
     [Required]
-    public string EmailAddress { get; set; }
+    public string EmailAddress { get; } = emailAddress;
 
     [Required]
-    public List<Role> Roles { get; set; }
+    public string Password { get; } = password;
 
     [Required]
-    public UserStatus UserStatus { get; set; }
+    public List<Role> Roles { get; } = roles;
+
+    [Required]
+    public UserStatus UserStatus { get; } = userStatus;
 }

@@ -49,7 +49,8 @@ internal class Auth0Service(
         string accessToken,
         string emailAddress,
         string firstName,
-        string lastName
+        string lastName,
+        string password
     )
     {
         using HttpClient client = new();
@@ -60,7 +61,7 @@ internal class Auth0Service(
             given_name = firstName,
             family_name = lastName,
             name = $"{firstName} {lastName}",
-            password = Guid.NewGuid().ToString(),
+            password = password,
             verify_email = false,
             connection = "Username-Password-Authentication",
         };
@@ -346,21 +347,17 @@ internal class Auth0Service(
     {
         using HttpClient client = new();
 
-        var scopes = new List<Dictionary<string, string>>();
-        foreach (var permission in permissions)
-        {
-            scopes.Add(
-                new Dictionary<string, string>
-                {
-                    ["value"] = permission.PermissionName,
-                    ["description"] = permission.PermissionDescription,
-                }
-            );
-        }
+        var scopes = permissions
+            .Select(permission => new Dictionary<string, string>
+            {
+                ["value"] = permission.PermissionName,
+                ["description"] = permission.PermissionDescription,
+            })
+            .ToList();
 
         var payload = new Dictionary<string, object> { ["scopes"] = scopes };
 
-        string jsonContent = JsonConvert.SerializeObject(payload);
+        var jsonContent = JsonConvert.SerializeObject(payload);
         var requestUri = $"https://{auth0Domain}/api/v2/resource-servers/{apiId}";
         HttpRequestMessage request =
             new(HttpMethod.Patch, requestUri)
@@ -396,7 +393,7 @@ internal class Auth0Service(
                 },
             },
         };
-        string jsonContent = JsonConvert.SerializeObject(payload);
+        var jsonContent = JsonConvert.SerializeObject(payload);
 
         var requestUri = $"https://{auth0Domain}/api/v2/roles/{auth0RoleId}/permissions";
         HttpRequestMessage request =
