@@ -94,7 +94,7 @@ app.Use(
     async (context, next) =>
     {
         // uncomment below line for getting user context from token
-        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
+        context.Items["Auth0Id"] = LocatorLib.GetAuth0Id(context);
 
         await next();
     }
@@ -104,14 +104,34 @@ app.Use(
 
 app.MapPost("/addUser", async (AddUser addUser) => await locator.AddUser(addUser)).WithTags("User");
 
-app.MapGet("/getUser", async (int userId) => await locator.GetUser(userId)).WithTags("User");
+app.MapGet("/getUserByUserId", async (int userId) => await locator.GetUser(userId))
+    .WithTags("User");
+
+app.MapGet("/getUserByAuthId", async (string auth0Id) => await locator.GetUser(auth0Id))
+    .WithTags("User");
 
 app.MapGet("/getUsers", async () => await locator.GetUsers()).WithTags("User");
+
+app.MapGet(
+        "/getUsersWithPagination",
+        async (string keyword, int pageNumber, int pageSize) =>
+            await locator.GetUsers(keyword, pageNumber, pageSize)
+    )
+    .WithTags("User");
+
+app.MapGet("/getUserLogsByUserId", async (int userId) => await locator.GetUserLogs(userId))
+    .WithTags("User");
+
+app.MapGet("/getUserLogsByAuth0Id", async (string auth0Id) => await locator.GetUserLogs(auth0Id))
+    .WithTags("User");
 
 app.MapPut("/updateUser", async (UpdateUser updateUser) => await locator.UpdateUser(updateUser))
     .WithTags("User");
 
-app.MapDelete("/deleteUser", async (string auth0Id) => await locator.DeleteUser(auth0Id))
+app.MapDelete("/deleteUserByAuth0Id", async (string auth0Id) => await locator.DeleteUser(auth0Id))
+    .WithTags("User");
+
+app.MapDelete("/deleteUserByUserId", async (int userId) => await locator.DeleteUser(userId))
     .WithTags("User");
 
 #endregion
@@ -280,6 +300,8 @@ app.MapPost(
 app.MapGet("/getConnection", async (int connectionId) => await locator.GetConnection(connectionId))
     .WithTags("Connection");
 
+app.MapGet("/getConnections", async () => await locator.GetConnections()).WithTags("Connection");
+
 app.MapDelete(
         "/deleteConnection",
         async (int clientId, int databaseId) => await locator.DeleteConnection(clientId, databaseId)
@@ -299,7 +321,7 @@ app.MapPost(
 
 #endregion
 
-#region Role Permission Endpoints
+#region Role Permission Endpointss
 
 app.MapPost(
         "/addRolePermission",

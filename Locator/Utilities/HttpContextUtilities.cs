@@ -16,14 +16,18 @@ internal static class HttpContextUtilities
 
     private static JsonWebToken GetAccessToken(HttpContext httpContext)
     {
-        string accessToken = null;
-        if (httpContext.Request.Headers.TryGetValue("Authorization", out var value))
-            accessToken = value.ToString().Replace("Bearer ", "");
+        var accessToken = httpContext
+            .Request.Headers.Authorization.ToString()
+            .Replace("Bearer ", "");
+
+        if (string.IsNullOrEmpty(accessToken))
+            throw new Exception("No access token found");
 
         var handler = new JsonWebTokenHandler();
-        var jsonToken = handler.ReadJsonWebToken(accessToken);
+        if (!handler.CanReadToken(accessToken))
+            throw new Exception("Can't read access token");
 
-        return jsonToken;
+        return handler.ReadJsonWebToken(accessToken);
     }
 
     private static bool IsTokenExpired(JsonWebToken jsonWebToken)

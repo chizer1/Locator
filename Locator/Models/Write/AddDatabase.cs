@@ -3,20 +3,26 @@ using Locator.Models.Read;
 
 namespace Locator.Models.Write;
 
-public class AddDatabase
+public abstract class AddDatabase(
+    string databaseName,
+    string databaseUser,
+    int databaseServerId,
+    int databaseTypeId,
+    DatabaseStatus databaseStatus
+)
 {
     [Required]
-    public string DatabaseName { get; set; }
+    public string DatabaseName { get; } = databaseName;
 
     [Required]
-    public string DatabaseUser { get; set; }
+    public string DatabaseUser { get; } = databaseUser;
 
     [Required]
-    public int DatabaseServerId { get; set; }
+    public int DatabaseServerId { get; } = databaseServerId;
 
     [Required]
-    public int DatabaseTypeId { get; set; }
+    public int DatabaseTypeId { get; } = databaseTypeId;
 
     [Required]
-    public DatabaseStatus DatabaseStatus { get; set; }
+    public DatabaseStatus DatabaseStatus { get; } = databaseStatus;
 }
