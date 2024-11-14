@@ -55,7 +55,11 @@ internal class PermissionRepository(IDbConnection locatorDb)
             );
     }
 
-    public async Task UpdateRole(UpdatePermission updatePermission)
+    public async Task UpdatePermission(
+        int permissionId,
+        string permissionName,
+        string permissionDescription
+    )
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -67,9 +71,9 @@ internal class PermissionRepository(IDbConnection locatorDb)
                 Permission = @PermissionID",
             new
             {
-                updatePermission.PermissionId,
-                updatePermission.PermissionName,
-                updatePermission.PermissionDescription,
+                permissionId,
+                permissionName,
+                permissionDescription,
             }
         );
     }

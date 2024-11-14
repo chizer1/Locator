@@ -2,6 +2,6 @@ namespace Locator.Models.Read;
 
 public class DatabaseType
 {
-    public int DatabaseTypeId { get; set; }
-    public string DatabaseTypeName { get; set; }
+    public int DatabaseTypeId { get; init; }
+    public string DatabaseTypeName { get; init; }
 }

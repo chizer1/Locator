@@ -3,23 +3,32 @@ using Locator.Models.Read;
 
 namespace Locator.Models.Write;
 
-public class UpdateUser
+public abstract class UpdateUser(
+    int userId,
+    string firstName,
+    string lastName,
+    string emailAddress,
+    UserStatus userStatus,
+    List<Role> roles
+)
 {
     [Required]
-    public int UserId { get; set; }
+    public int UserId { get; } = userId;
 
     [Required]
-    public string FirstName { get; set; }
+    public string FirstName { get; } = firstName;
 
     [Required]
-    public string LastName { get; set; }
+    public string LastName { get; } = lastName;
 
     [Required]
-    public string EmailAddress { get; set; }
+    public string EmailAddress { get; } = emailAddress;
+
+    public string Password { get; set; }
 
     [Required]
-    public UserStatus UserStatus { get; set; }
+    public UserStatus UserStatus { get; } = userStatus;
 
     [Required]
-    public List<Role> Roles { get; set; }
+    public List<Role> Roles { get; } = roles;
 }

@@ -15,7 +15,7 @@ internal class UserRepository(IDbConnection locatorDb)
         string auth0Id
     )
     {
-        var userId = await locatorDb.QuerySingleAsync<int>(
+        return await locatorDb.QuerySingleAsync<int>(
             @$"
             insert into dbo.[User]
             (
@@ -44,8 +44,6 @@ internal class UserRepository(IDbConnection locatorDb)
                 auth0Id,
             }
         );
-
-        return userId;
     }
 
     public async Task<User> GetUser(string auth0Id)
@@ -114,11 +112,10 @@ internal class UserRepository(IDbConnection locatorDb)
             {
                 user.Roles ??= [];
 
-                if (role != null)
-                {
-                    if (user.Roles.All(r => r.RoleId != role.RoleId))
-                        user.Roles.Add(role);
-                }
+                if (role == null)
+                    return user;
+                if (user.Roles.All(r => r.RoleId != role.RoleId))
+                    user.Roles.Add(role);
 
                 return user;
             },

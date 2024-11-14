@@ -2,11 +2,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Locator.Models.Write;
 
-public class AddRole
+public abstract class AddRole(string roleName, string roleDescription)
 {
     [Required]
-    public string RoleName { get; set; }
+    public string RoleName { get; } = roleName;
 
     [Required]
-    public string RoleDescription { get; set; }
+    public string RoleDescription { get; } = roleDescription;
 }

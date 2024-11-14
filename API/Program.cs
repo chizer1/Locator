@@ -94,7 +94,7 @@ app.Use(
     async (context, next) =>
     {
         // uncomment below line for getting user context from token
-        context.Items["Auth0Id"] = LocatorLib.GetAuth0Id(context);
+        //context.Items["Auth0Id"] = LocatorLib.GetAuth0Id(context);
 
         await next();
     }
@@ -145,6 +145,13 @@ app.MapGet("/getClient", async (int clientId) => await locator.GetClient(clientI
     .WithTags("Client");
 
 app.MapGet("/getClients", async () => await locator.GetClients()).WithTags("Client");
+
+app.MapGet(
+        "/getClientsWithPagination",
+        async (string search, int pageNumber, int pageSize) =>
+            await locator.GetClients(search, pageNumber, pageSize)
+    )
+    .WithTags("Client");
 
 app.MapPut(
         "/updateClient",
@@ -248,6 +255,13 @@ app.MapGet("/getDatabase", async (int databaseId) => await locator.GetDatabase(d
 
 app.MapGet("/getDatabases", async () => await locator.GetDatabases()).WithTags("Database");
 
+app.MapGet(
+        "/getDatabasesWithPagination",
+        async (string searchText, int pageNumber, int pageSize) =>
+            await locator.GetDatabases(searchText, pageNumber, pageSize)
+    )
+    .WithTags("Database");
+
 app.MapPut(
         "/updateDatabase",
         async (UpdateDatabase updateDatabase) => await locator.UpdateDatabase(updateDatabase)
@@ -319,6 +333,24 @@ app.MapPost(
     )
     .WithTags("Permission");
 
+app.MapGet("/getPermission", async (int permissionId) => await locator.GetPermission(permissionId))
+    .WithTags("Permission");
+
+app.MapGet("/getPermissions", async () => await locator.GetPermissions()).WithTags("Permission");
+
+app.MapPut(
+        "/updatePermission",
+        async (int permissionId, string permissionName, string permissionDescription) =>
+            await locator.UpdatePermission(permissionId, permissionName, permissionDescription)
+    )
+    .WithTags("Permission");
+
+app.MapDelete(
+        "/deletePermission",
+        async (int permissionId) => await locator.DeletePermission(permissionId)
+    )
+    .WithTags("Permission");
+
 #endregion
 
 #region Role Permission Endpointss
@@ -330,8 +362,14 @@ app.MapPost(
     )
     .WithTags("Role Permission");
 
-#endregion
+app.MapDelete(
+        "/deleteRolePermission",
+        async (int roleId, int permissionId) =>
+            await locator.DeleteRolePermission(roleId, permissionId)
+    )
+    .WithTags("Role Permission");
 
+#endregion
 
 // user is signed in, hitting an endpoint with the admin:read permission, permission they setup through the library
 app.MapGet(

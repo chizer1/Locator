@@ -90,7 +90,6 @@ internal class ConnectionRepository(IDbConnection locatorDb)
         );
     }
 
-    // get connections
     public async Task<List<Connection>> GetConnections()
     {
         var results = await locatorDb.QueryAsync<Connection, Database, User, Client, Connection>(

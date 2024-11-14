@@ -2,7 +2,7 @@ namespace Locator.Models.Read;
 
 public class Permission
 {
-    public int PermissionId { get; set; }
-    public string PermissionName { get; set; }
-    public string PermissionDescription { get; set; }
+    public int PermissionId { get; init; }
+    public string PermissionName { get; init; }
+    public string PermissionDescription { get; init; }
 }

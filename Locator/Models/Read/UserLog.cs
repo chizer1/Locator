@@ -11,7 +11,7 @@ public class UserLog
     public string Type { get; set; }
 
     [JsonProperty("ip")]
-    public string IP { get; set; }
+    public string Ip { get; set; }
 
     [JsonProperty("user_agent")]
     public string UserAgent { get; set; }

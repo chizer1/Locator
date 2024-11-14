@@ -40,13 +40,11 @@ internal class DatabaseRepository(IDbConnection locatorDb)
         );
 
         await locatorDb.ExecuteAsync(
-            @$"create login {addDatabase.DatabaseUser} with password = 'Skyline-Armory-Paramount3-Shut'"
+            $"create login {addDatabase.DatabaseUser} with password = 'Skyline-Armory-Paramount3-Shut'"
         );
 
-        await locatorDb.ExecuteAsync(@$"create database {addDatabase.DatabaseName}");
-        await locatorDb.ExecuteAsync(
-            @$"create login {addDatabase.DatabaseUser} with password = 'Skyline-Armory-Paramount3-Shut'"
-        );
+        await locatorDb.ExecuteAsync($"create database {addDatabase.DatabaseName}");
+
         await locatorDb.ExecuteAsync(
             @$"
             use {addDatabase.DatabaseName}

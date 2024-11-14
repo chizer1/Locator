@@ -95,8 +95,8 @@ internal class ClientRepository(IDbConnection locatorDb)
             }
         );
 
-        int rowCount = results.Read<int>().First();
-        return new(
+        var rowCount = results.Read<int>().First();
+        return new PagedList<Client>(
             results.Read<Client>().ToList(),
             rowCount,
             pageNumber,

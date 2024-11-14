@@ -4,7 +4,6 @@ using Locator.Models.Write;
 using Locator.Repositories;
 using Locator.Services;
 using Locator.Utilities;
-using static Locator.Utilities.HttpContextUtilities;
 
 namespace Locator;
 
@@ -19,6 +18,7 @@ public class LocatorLib()
     private readonly RoleService _roleService;
     private readonly ConnectionRepository _connectionRepository;
     private readonly PermissionService _permissionService;
+    private readonly PermissionRepository _permissionRepository;
 
     public LocatorLib(
         string locatorDbConnectionString,
@@ -44,6 +44,7 @@ public class LocatorLib()
         _databaseRepository = new DatabaseRepository(locatorDb);
         _databaseServerRepository = new DatabaseServerRepository(locatorDb);
         _databaseTypeRepository = new DatabaseTypeRepository(locatorDb);
+        _permissionRepository = new PermissionRepository(locatorDb);
         PermissionRepository permissionRepository = new(locatorDb);
         RolePermissionRepository rolePermissionRepository = new(locatorDb);
         _permissionService = new PermissionService(
@@ -271,6 +272,14 @@ public class LocatorLib()
     }
 
     /// <summary>
+    ///Gets clients from locator database with search text and pagination
+    /// </summary>
+    public async Task<PagedList<Client>> GetClients(string searchText, int page, int pageSize)
+    {
+        return await _clientRepository.GetClients(searchText, page, pageSize);
+    }
+
+    /// <summary>
     ///Get client information from locator database
     /// </summary>
     public async Task<Client> GetClient(int clientId)
@@ -335,6 +344,14 @@ public class LocatorLib()
     }
 
     /// <summary>
+    ///Get databases from locator database with search text and pagination
+    /// </summary>
+    public async Task<PagedList<Database>> GetDatabases(string searchText, int page, int pageSize)
+    {
+        return await _databaseRepository.GetDatabases(searchText, page, pageSize);
+    }
+
+    /// <summary>
     ///Get database information from locator database
     /// </summary>
     public async Task<Database> GetDatabase(int databaseId)
@@ -351,7 +368,7 @@ public class LocatorLib()
     }
 
     /// <summary>
-    ///Delete database information from locator database and on database server
+    ///Delete database information from locator database and on server it lives on
     /// </summary>
     public async Task DeleteDatabase(int databaseId)
     {
@@ -362,26 +379,41 @@ public class LocatorLib()
 
     #region Database Server
 
+    /// <summary>
+    ///Add existing database server information to locator database. (This will not create spin up a database server for you)
+    /// </summary>
     public async Task<int> AddDatabaseServer(AddDatabaseServer addDatabaseServer)
     {
         return await _databaseServerRepository.AddDatabaseServer(addDatabaseServer);
     }
 
+    /// <summary>
+    ///Get database servers from locator database
+    /// </summary>
     public async Task<List<DatabaseServer>> GetDatabaseServers()
     {
         return await _databaseServerRepository.GetDatabaseServers();
     }
 
+    /// <summary>
+    ///Get database server information from locator database
+    /// </summary>
     public async Task<DatabaseServer> GetDatabaseServer(int databaseServerId)
     {
         return await _databaseServerRepository.GetDatabaseServer(databaseServerId);
     }
 
+    /// <summary>
+    ///Update database server information in locator database
+    /// </summary>
     public async Task UpdateDatabaseServer(UpdateDatabaseServer updateDatabaseServer)
     {
         await _databaseServerRepository.UpdateDatabaseServer(updateDatabaseServer);
     }
 
+    /// <summary>
+    ///Delete database server information from locator database
+    /// </summary>
     public async Task DeleteDatabaseServer(int databaseServerId)
     {
         await _databaseServerRepository.DeleteDatabaseServer(databaseServerId);
@@ -391,26 +423,41 @@ public class LocatorLib()
 
     #region Database Type
 
+    /// <summary>
+    ///Add database type to locator database
+    /// </summary>
     public async Task<int> AddDatabaseType(string name)
     {
         return await _databaseTypeRepository.AddDatabaseType(name);
     }
 
+    /// <summary>
+    ///Get database types from locator database
+    /// </summary>
     public async Task<List<DatabaseType>> GetDatabaseTypes()
     {
         return await _databaseTypeRepository.GetDatabaseTypes();
     }
 
+    /// <summary>
+    ///Get database type information from locator database
+    /// </summary>
     public async Task<DatabaseType> GetDatabaseType(int databaseTypeId)
     {
         return await _databaseTypeRepository.GetDatabaseType(databaseTypeId);
     }
 
+    /// <summary>
+    ///Update database type information in locator database
+    /// </summary>
     public async Task UpdateDatabaseType(int databaseTypeId, string name)
     {
         await _databaseTypeRepository.UpdateDatabaseType(databaseTypeId, name);
     }
 
+    /// <summary>
+    ///Delete database type from locator database
+    /// </summary>
     public async Task DeleteDatabaseType(int databaseTypeId)
     {
         await _databaseTypeRepository.DeleteDatabaseType(databaseTypeId);
@@ -418,20 +465,77 @@ public class LocatorLib()
 
     #endregion
 
-    #region Permission
+    #region Permissions
 
+    /// <summary>
+    ///Add permission to locator database and to Auth0 API
+    /// </summary>
     public async Task AddPermission(string permissionName, string permissionDescription)
     {
         await _permissionService.AddPermission(permissionName, permissionDescription);
     }
 
+    /// <summary>
+    ///Get permission information in locator database
+    /// </summary>
+    public async Task<Permission> GetPermission(int permissionId)
+    {
+        return await _permissionRepository.GetPermission(permissionId);
+    }
+
+    /// <summary>
+    ///Get permission information in locator database
+    /// </summary>
+    public async Task<List<Permission>> GetPermissions()
+    {
+        return await _permissionRepository.GetPermissions();
+    }
+
+    /// <summary>
+    ///Update permission information in locator database and to Auth0 API
+    /// </summary>
+    public async Task UpdatePermission(
+        int permissionId,
+        string permissionName,
+        string permissionDescription
+    )
+    {
+        await _permissionService.UpdatePermission(
+            permissionId,
+            permissionName,
+            permissionDescription
+        );
+    }
+
+    /// <summary>
+    ///Delete permission in locator database and Auth0 API
+    /// </summary>
+    public async Task DeletePermission(int permissionId)
+    {
+        await _permissionService.DeletePermission(permissionId);
+    }
+
+    /// <summary>
+    ///Add permission to a role in locator database and Auth0 API
+    /// </summary>
     public async Task<int> AddRolePermission(int roleId, int permissionId)
     {
         return await _permissionService.AddRolePermission(roleId, permissionId);
     }
 
+    /// <summary>
+    ///Delete permission from a role in locator database and Auth0 API
+    /// </summary>
+    public async Task DeleteRolePermission(int roleId, int permissionId)
+    {
+        await _permissionService.DeleteRolePermission(roleId, permissionId);
+    }
+
     #endregion
 
+    /// <summary>
+    ///Get a user's Auth0Id from an authenticated http request
+    /// </summary>
     public static string GetAuth0Id(HttpContext httpContext)
     {
         return HttpContextUtilities.GetAuth0Id(httpContext);

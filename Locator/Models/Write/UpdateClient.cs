@@ -3,17 +3,22 @@ using Locator.Models.Read;
 
 namespace Locator.Models.Write;
 
-public class UpdateClient
+public abstract class UpdateClient(
+    int clientId,
+    string clientName,
+    string clientCode,
+    ClientStatus clientStatus
+)
 {
     [Required]
-    public int ClientId { get; set; }
+    public int ClientId { get; } = clientId;
 
     [Required]
-    public string ClientName { get; set; }
+    public string ClientName { get; } = clientName;
 
     [Required]
-    public string ClientCode { get; set; }
+    public string ClientCode { get; } = clientCode;
 
     [Required]
-    public ClientStatus ClientStatus { get; set; }
+    public ClientStatus ClientStatus { get; } = clientStatus;
 }

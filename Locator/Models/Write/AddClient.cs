@@ -3,14 +3,14 @@ using Locator.Models.Read;
 
 namespace Locator.Models.Write;
 
-public class AddClient
+public abstract class AddClient(string clientName, string clientCode, ClientStatus clientStatus)
 {
     [Required]
-    public string ClientName { get; set; }
+    public string ClientName { get; } = clientName;
 
     [Required]
-    public string ClientCode { get; set; }
+    public string ClientCode { get; } = clientCode;
 
     [Required]
-    public ClientStatus ClientStatus { get; set; }
+    public ClientStatus ClientStatus { get; } = clientStatus;
 }
