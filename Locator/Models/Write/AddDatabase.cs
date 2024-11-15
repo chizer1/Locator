@@ -12,17 +12,17 @@ public abstract class AddDatabase(
 )
 {
     [Required]
-    public string DatabaseName { get; } = databaseName;
+    public string DatabaseName { get; set; } = databaseName;
 
     [Required]
-    public string DatabaseUser { get; } = databaseUser;
+    public string DatabaseUser { get; set; } = databaseUser;
 
     [Required]
-    public int DatabaseServerId { get; } = databaseServerId;
+    public int DatabaseServerId { get; set; } = databaseServerId;
 
     [Required]
-    public int DatabaseTypeId { get; } = databaseTypeId;
+    public int DatabaseTypeId { get; set; } = databaseTypeId;
 
     [Required]
-    public DatabaseStatus DatabaseStatus { get; } = databaseStatus;
+    public DatabaseStatus DatabaseStatus { get; set; } = databaseStatus;
 }

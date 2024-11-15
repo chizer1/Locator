@@ -1,4 +1,4 @@
-namespace Locator.Models.Read;
+namespace Locator.Domain;
 
 [Flags]
 public enum ClientStatus

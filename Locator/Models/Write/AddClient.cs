@@ -6,11 +6,11 @@ namespace Locator.Models.Write;
 public abstract class AddClient(string clientName, string clientCode, ClientStatus clientStatus)
 {
     [Required]
-    public string ClientName { get; } = clientName;
+    public string ClientName { get; set; } = clientName;
 
     [Required]
-    public string ClientCode { get; } = clientCode;
+    public string ClientCode { get; set; } = clientCode;
 
     [Required]
-    public ClientStatus ClientStatus { get; } = clientStatus;
+    public ClientStatus ClientStatus { get; set; } = clientStatus;
 }

@@ -1,9 +1,12 @@
 using System.Data.SqlClient;
+using Locator.Domain;
+using Locator.Features.Users.AddUser;
 using Locator.Models.Read;
 using Locator.Models.Write;
 using Locator.Repositories;
 using Locator.Services;
 using Locator.Utilities;
+using AddUser = Locator.Features.Users.AddUser.AddUser;
 
 namespace Locator;
 
@@ -19,6 +22,7 @@ public class LocatorLib()
     private readonly ConnectionRepository _connectionRepository;
     private readonly PermissionService _permissionService;
     private readonly PermissionRepository _permissionRepository;
+    private readonly AddUser _addUser;
 
     public LocatorLib(
         string locatorDbConnectionString,
@@ -32,6 +36,7 @@ public class LocatorLib()
     {
         var locatorDb = new SqlConnection(locatorDbConnectionString);
 
+        _addUser = new AddUser(locatorDb);
         Auth0Service auth0Service =
             new(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
         RoleRepository roleRepository = new(locatorDb);
@@ -66,9 +71,11 @@ public class LocatorLib()
     /// <summary>
     /// Add user to locator database and Auth0 tenant
     /// </summary>
-    public async Task<int> AddUser(AddUser addUser)
+    public async Task<int> AddUser(Models.Write.AddUser addUser)
     {
-        return await _userService.AddUser(addUser);
+        var command = new AddUserCommand(firstName, lastName, email);
+
+        return await _addUser.Handle(command);
     }
 
     /// <summary>

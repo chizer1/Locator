@@ -1,7 +1,7 @@
-namespace Locator.Models.Read;
+namespace Locator.Domain;
 
 [Flags]
-public enum UserStatus
+public enum DatabaseStatus
 {
     Pending = 1,
     Active = 2,

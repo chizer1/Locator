@@ -1,4 +1,4 @@
-namespace Locator.Models.Read;
+namespace Locator.Domain;
 
 public class Database
 {
