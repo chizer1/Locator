@@ -2,11 +2,12 @@ using System.Data.SqlClient;
 using System.Text;
 using Dapper;
 using FluentValidation;
+using Locator.Common;
 using Locator.Domain;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Locator.Features.Users.AddUser;
+namespace Locator.Features.Users;
 
 internal sealed class AddUserCommandValidator : AbstractValidator<AddUserCommand>
 {
@@ -38,19 +39,21 @@ public class AddUserCommand(
     public UserStatus UserStatus { get; } = userStatus;
 }
 
-public class AddUser(SqlConnection locatorDb)
+public class AddUser(SqlConnection locatorDb, string auth0Domain, Auth0 auth0)
 {
     public async Task<int> Handle(AddUserCommand command)
     {
         await new AddUserCommandValidator().ValidateAndThrowAsync(command);
 
-        var existingUser = await locatorDb.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM Users WHERE Email = @Email",
-            new { Email = command.EmailAddress }
+        var existingUser = await locatorDb.QueryFirstOrDefaultAsync<int?>(
+            "select UserId from dbo.[User] where EmailAddress = @EmailAddress",
+            new { command.EmailAddress }
         );
 
         if (existingUser != null)
-            throw new ValidationException($"Email {command.EmailAddress} already exists");
+            throw new ValidationException($"{command.EmailAddress} already exists");
+
+        var accessToken = await auth0.GetAccessToken();
 
         dynamic userMetadata = new
         {
@@ -64,13 +67,13 @@ public class AddUser(SqlConnection locatorDb)
         };
         string jsonContent = JsonConvert.SerializeObject(userMetadata);
 
-        var requestUri = $"https://{123}/api/v2/users";
+        var requestUri = $"https://{auth0Domain}/api/v2/users";
         HttpRequestMessage request =
             new(HttpMethod.Post, requestUri)
             {
                 Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
             };
-        request.Headers.Add("Authorization", $"Bearer {123}");
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
         using var response = await new HttpClient().SendAsync(request);
         var responseString = await response.Content.ReadAsStringAsync();

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Locator.Domain;
 using Locator.Models.Read;
 
 namespace Locator.Models.Write;

@@ -1,3 +1,4 @@
+using Locator.Domain;
 using Locator.Models.Read;
 using Locator.Models.Write;
 using Locator.Repositories;
@@ -7,13 +8,13 @@ namespace Locator.Services;
 internal class PermissionService(
     PermissionRepository permissionRepository,
     RolePermissionRepository rolePermissionRepository,
-    RoleRepository roleRepository,
-    Auth0Service auth0Service
+    RoleRepository roleRepository
+//Auth0Service auth0Service
 )
 {
     public async Task<int> AddPermission(string permissionName, string permissionDescription)
     {
-        var accessToken = await auth0Service.GetAccessToken();
+        //var accessToken = await auth0Service.GetAccessToken();
 
         var permissions = await permissionRepository.GetPermissions();
         permissions.Add(
@@ -24,7 +25,7 @@ internal class PermissionService(
             }
         );
 
-        await auth0Service.UpdatePermissions(accessToken, permissions);
+        //await auth0Service.UpdatePermissions(accessToken, permissions);
 
         return await permissionRepository.AddPermission(permissionName, permissionDescription);
     }
@@ -35,7 +36,7 @@ internal class PermissionService(
         string permissionDescription
     )
     {
-        var accessToken = await auth0Service.GetAccessToken();
+        //var accessToken = await auth0Service.GetAccessToken();
 
         // auth0 stuff here
 
@@ -48,23 +49,23 @@ internal class PermissionService(
 
     public async Task<int> AddRolePermission(int roleId, int permissionId)
     {
-        var accessToken = await auth0Service.GetAccessToken();
+        //var accessToken = await auth0Service.GetAccessToken();
 
         var permission = await permissionRepository.GetPermission(permissionId);
         var role = await roleRepository.GetRole(roleId);
 
-        await auth0Service.AddPermissionToRole(
-            accessToken,
-            permission.PermissionName,
-            role.Auth0RoleId
-        );
+        // await auth0Service.AddPermissionToRole(
+        //     accessToken,
+        //     permission.PermissionName,
+        //     role.Auth0RoleId
+        // );
 
         return await rolePermissionRepository.AddRolePermission(roleId, permissionId);
     }
 
     public async Task DeletePermission(int permissionId)
     {
-        var accessToken = await auth0Service.GetAccessToken();
+        //var accessToken = await auth0Service.GetAccessToken();
 
         var permission = await permissionRepository.GetPermission(permissionId);
 
@@ -75,7 +76,7 @@ internal class PermissionService(
 
     public async Task DeleteRolePermission(int roleId, int permissionId)
     {
-        var accessToken = await auth0Service.GetAccessToken();
+        //var accessToken = await auth0Service.GetAccessToken();
 
         var permission = await permissionRepository.GetPermission(permissionId);
         var role = await roleRepository.GetRole(roleId);

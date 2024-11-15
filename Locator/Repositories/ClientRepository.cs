@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using Locator.Domain;
 using Locator.Models.Read;
 using Locator.Models.Write;
 
