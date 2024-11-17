@@ -2,12 +2,20 @@ using System.Data.SqlClient;
 using Locator.Common;
 using Locator.Domain;
 using Locator.Features.Users;
+using Locator.Features.Users.AddUser;
+using Locator.Features.Users.DeleteUser;
+using Locator.Features.Users.GetUsers;
+using Locator.Features.Users.UpdateUser;
+using Locator.Models.Read;
 
 namespace Locator.Library.Users;
 
 public class Users
 {
     private readonly AddUser _addUser;
+    private readonly GetUsers _getUsers;
+    private readonly UpdateUser _updateUser;
+    private readonly DeleteUser _deleteUser;
 
     public Users(
         SqlConnection locatorDb,
@@ -17,19 +25,49 @@ public class Users
     )
     {
         var auth0 = new Auth0(auth0Domain, auth0ClientId, auth0ClientSecret);
-        _addUser = new AddUser(locatorDb, auth0Domain, auth0);
+        IUserRepository userRepository = new UserRepository(locatorDb);
+        IAuth0UserService auth0UserService = new Auth0UserService(auth0);
+
+        _addUser = new AddUser(userRepository, auth0UserService);
+        _getUsers = new GetUsers(userRepository);
+        _updateUser = new UpdateUser(userRepository, auth0UserService);
+        _deleteUser = new DeleteUser(userRepository, auth0UserService);
     }
 
     public async Task<int> AddUser(
         string firstName,
         string lastName,
-        string email,
+        string emailAddress,
         string password,
         UserStatus status = UserStatus.Active
     )
     {
         return await _addUser.Handle(
-            new AddUserCommand(firstName, lastName, email, password, status)
+            new AddUserCommand(firstName, lastName, emailAddress, password, status)
         );
+    }
+
+    public async Task<PagedList<User>> GetUsers(string keyword, int pageNumber, int pageSize)
+    {
+        return await _getUsers.Handle(new GetUsersQuery(keyword, pageNumber, pageSize));
+    }
+
+    public async Task UpdateUser(
+        int userId,
+        string firstName,
+        string lastName,
+        string emailAddress,
+        string password,
+        UserStatus status
+    )
+    {
+        await _updateUser.Handle(
+            new UpdateUserCommand(userId, firstName, lastName, emailAddress, password, status)
+        );
+    }
+
+    public async Task DeleteUser(int userId)
+    {
+        await _deleteUser.Handle(new DeleteUserCommand(userId));
     }
 }

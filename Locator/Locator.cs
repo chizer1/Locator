@@ -1,5 +1,7 @@
 using System.Data.SqlClient;
+using Locator.Domain;
 using Locator.Library.Users;
+using Locator.Models.Read;
 
 namespace Locator;
 
@@ -28,9 +30,41 @@ public class Locator
         string firstName,
         string lastName,
         string emailAddress,
-        string password
+        string password,
+        UserStatus userStatus
     )
     {
-        return await _users.AddUser(firstName, lastName, emailAddress, password);
+        return await _users.AddUser(firstName, lastName, emailAddress, password, userStatus);
+    }
+
+    /// <summary>
+    /// Get users from locator database
+    /// </summary>
+    public async Task<PagedList<User>> GetUsers(string keyWord, int pageNumber, int pageSize)
+    {
+        return await _users.GetUsers(keyWord, pageNumber, pageSize);
+    }
+
+    /// <summary>
+    /// Update user information in locator database and Auth0 tenant
+    /// </summary>
+    public async Task UpdateUser(
+        int userId,
+        string firstName,
+        string lastName,
+        string emailAddress,
+        string password,
+        UserStatus userStatus
+    )
+    {
+        await _users.UpdateUser(userId, firstName, lastName, emailAddress, password, userStatus);
+    }
+
+    /// <summary>
+    /// Delete user from locator database and Auth0 tenant
+    /// </summary>
+    public async Task DeleteUser(int userId)
+    {
+        await _users.DeleteUser(userId);
     }
 }

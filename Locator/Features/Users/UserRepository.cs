@@ -1,12 +1,11 @@
-using System.Data;
+using System.Data.SqlClient;
 using Dapper;
 using Locator.Domain;
 using Locator.Models.Read;
-using Locator.Models.Write;
 
-namespace Locator.Repositories;
+namespace Locator.Features.Users;
 
-internal class UserRepository(IDbConnection locatorDb)
+internal class UserRepository(SqlConnection locatorDb) : IUserRepository
 {
     public async Task<int> AddUser(
         string firstName,
@@ -47,9 +46,9 @@ internal class UserRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task<User> GetUser(string auth0Id)
+    public async Task<User> GetUser(string emailAddress)
     {
-        var results = await locatorDb.QueryAsync<User, Role, User>(
+        return await locatorDb.QuerySingleAsync<User>(
             @$"
             select
                 u.UserID {nameof(User.UserId)},
@@ -57,74 +56,29 @@ internal class UserRepository(IDbConnection locatorDb)
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
                 u.UserStatusID {nameof(User.UserStatus)},
-                u.Auth0ID {nameof(User.Auth0Id)},
-                r.RoleID {nameof(Role.RoleId)},
-                r.Auth0RoleID {nameof(Role.Auth0RoleId)},
-                r.Name {nameof(Role.Name)},
-                r.Description {nameof(Role.Description)}
+                u.Auth0ID {nameof(User.Auth0Id)}
             from dbo.[User] u
-            left join dbo.UserRole ur
-                on ur.UserID = u.UserID
-            left join dbo.Role r
-                on r.RoleID = ur.RoleID
             where
-                u.Auth0ID = @Auth0ID",
-            (user, role) =>
-            {
-                user.Roles ??= [];
-
-                if (role == null)
-                    return user;
-                if (user.Roles.All(r => r.RoleId != role.RoleId))
-                    user.Roles.Add(role);
-
-                return user;
-            },
-            new { Auth0ID = auth0Id },
-            splitOn: $"{nameof(Role.RoleId)}"
+                u.EmailAddress = @EmailAddress",
+            new { emailAddress }
         );
-
-        return results.FirstOrDefault();
     }
 
     public async Task<User> GetUser(int userId)
     {
-        var results = await locatorDb.QueryAsync<User, Role, User>(
+        return await locatorDb.QuerySingleAsync<User>(
             @$"
             select
                 u.UserID {nameof(User.UserId)},
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
                 u.EmailAddress {nameof(User.EmailAddress)},
-                u.UserStatusID {nameof(User.UserStatus)},
-                u.Auth0ID {nameof(User.Auth0Id)},
-                r.RoleID {nameof(Role.RoleId)},
-                r.Auth0RoleID {nameof(Role.Auth0RoleId)},
-                r.Name {nameof(Role.Name)},
-                r.Description {nameof(Role.Description)}
+                u.UserStatusID {nameof(User.UserStatus)}
             from dbo.[User] u
-            left join dbo.UserRole ur
-                on ur.UserID = u.UserID
-            left join dbo.Role r
-                on r.RoleID = ur.RoleID
             where
                 u.UserId = @UserId",
-            (user, role) =>
-            {
-                user.Roles ??= [];
-
-                if (role == null)
-                    return user;
-                if (user.Roles.All(r => r.RoleId != role.RoleId))
-                    user.Roles.Add(role);
-
-                return user;
-            },
-            new { userId },
-            splitOn: $"{nameof(Role.RoleId)}"
+            new { userId }
         );
-
-        return results.FirstOrDefault();
     }
 
     public async Task<List<User>> GetUsers()
@@ -194,7 +148,13 @@ internal class UserRepository(IDbConnection locatorDb)
         );
     }
 
-    public async Task UpdateUser(UpdateUser updateUser)
+    public async Task UpdateUser(
+        int userId,
+        string firstName,
+        string lastName,
+        string emailAddress,
+        UserStatus userStatus
+    )
     {
         await locatorDb.ExecuteAsync(
             @$"
@@ -208,11 +168,11 @@ internal class UserRepository(IDbConnection locatorDb)
                 UserID = @UserID",
             new
             {
-                updateUser.UserId,
-                updateUser.FirstName,
-                updateUser.LastName,
-                updateUser.EmailAddress,
-                UserStatusID = (int)updateUser.UserStatus,
+                userId,
+                firstName,
+                lastName,
+                emailAddress,
+                UserStatusID = (int)userStatus,
             }
         );
     }

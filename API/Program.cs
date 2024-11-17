@@ -1,7 +1,4 @@
-using Dapper;
-using Locator;
-using Locator.Library.Users;
-using Locator.Models.Write;
+using Locator.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
@@ -105,40 +102,46 @@ app.Use(
 
 app.MapPost(
         "/addUser",
-        async (string firstName, string lastName, string emailAddress, string password) =>
-            await locator.AddUser(firstName, lastName, emailAddress, password)
+        async (
+            string firstName,
+            string lastName,
+            string emailAddress,
+            string password,
+            UserStatus userStatus
+        ) => await locator.AddUser(firstName, lastName, emailAddress, password, userStatus)
     )
     .WithTags("User");
 
-// app.MapGet("/getUserByUserId", async (int userId) => await locator.GetUser(userId))
-//     .WithTags("User");
-//
-// app.MapGet("/getUserByAuthId", async (string auth0Id) => await locator.GetUser(auth0Id))
-//     .WithTags("User");
-//
-// app.MapGet("/getUsers", async () => await locator.GetUsers()).WithTags("User");
-//
-// app.MapGet(
-//         "/getUsersWithPagination",
-//         async (string keyword, int pageNumber, int pageSize) =>
-//             await locator.GetUsers(keyword, pageNumber, pageSize)
-//     )
-//     .WithTags("User");
-//
-// app.MapGet("/getUserLogsByUserId", async (int userId) => await locator.GetUserLogs(userId))
-//     .WithTags("User");
-//
-// app.MapGet("/getUserLogsByAuth0Id", async (string auth0Id) => await locator.GetUserLogs(auth0Id))
-//     .WithTags("User");
-//
-// app.MapPut("/updateUser", async (UpdateUser updateUser) => await locator.UpdateUser(updateUser))
-//     .WithTags("User");
-//
-// app.MapDelete("/deleteUserByAuth0Id", async (string auth0Id) => await locator.DeleteUser(auth0Id))
-//     .WithTags("User");
-//
-// app.MapDelete("/deleteUserByUserId", async (int userId) => await locator.DeleteUser(userId))
-//     .WithTags("User");
+app.MapGet(
+        "/getUsers",
+        async (string keyword, int pageNumber, int pageSize) =>
+            await locator.GetUsers(keyword, pageNumber, pageSize)
+    )
+    .WithTags("User");
+
+app.MapPut(
+        "/updateUser",
+        async (
+            int userId,
+            string firstName,
+            string lastName,
+            string emailAddress,
+            string password,
+            UserStatus userStatus
+        ) =>
+            await locator.UpdateUser(
+                userId,
+                firstName,
+                lastName,
+                emailAddress,
+                password,
+                userStatus
+            )
+    )
+    .WithTags("User");
+
+app.MapDelete("/deleteUser", async (int userId) => await locator.DeleteUser(userId))
+    .WithTags("User");
 
 #endregion
 //

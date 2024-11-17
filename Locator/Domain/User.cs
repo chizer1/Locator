@@ -8,5 +8,4 @@ public class User
     public string LastName { get; init; }
     public string EmailAddress { get; init; }
     public UserStatus UserStatus { get; init; }
-    public List<Role> Roles { get; set; }
 }

@@ -6,7 +6,12 @@ namespace Locator.Common;
 
 public class Auth0(string auth0Domain, string auth0ClientId, string auth0ClientSecret)
 {
-    public async Task<string> GetAccessToken()
+    public string GetAuth0Domain()
+    {
+        return auth0Domain;
+    }
+
+    public async Task<string> CreateAccessToken()
     {
         dynamic requestData = new
         {
