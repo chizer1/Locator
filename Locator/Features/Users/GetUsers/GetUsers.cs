@@ -1,6 +1,6 @@
 using FluentValidation;
 using Locator.Domain;
-using Locator.Models.Read;
+using Locator.Common.Models;
 
 namespace Locator.Features.Users.GetUsers;
 

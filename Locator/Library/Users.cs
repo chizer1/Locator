@@ -1,14 +1,14 @@
 using System.Data.SqlClient;
 using Locator.Common;
+using Locator.Common.Models;
 using Locator.Domain;
 using Locator.Features.Users;
 using Locator.Features.Users.AddUser;
 using Locator.Features.Users.DeleteUser;
 using Locator.Features.Users.GetUsers;
 using Locator.Features.Users.UpdateUser;
-using Locator.Models.Read;
 
-namespace Locator.Library.Users;
+namespace Locator.Library;
 
 public class Users
 {

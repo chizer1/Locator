@@ -1,7 +1,7 @@
 using System.Data.SqlClient;
 using Dapper;
 using Locator.Domain;
-using Locator.Models.Read;
+using Locator.Common.Models;
 
 namespace Locator.Features.Users;
 
@@ -48,9 +48,10 @@ internal class UserRepository(SqlConnection locatorDb) : IUserRepository
 
     public async Task<User> GetUser(string emailAddress)
     {
-        return await locatorDb.QuerySingleAsync<User>(
+        return await locatorDb.QuerySingleOrDefaultAsync<User>(
             @$"
             select
+                u.Auth0ID {nameof(User.Auth0Id)},
                 u.UserID {nameof(User.UserId)},
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},
@@ -66,9 +67,10 @@ internal class UserRepository(SqlConnection locatorDb) : IUserRepository
 
     public async Task<User> GetUser(int userId)
     {
-        return await locatorDb.QuerySingleAsync<User>(
+        return await locatorDb.QuerySingleOrDefaultAsync<User>(
             @$"
             select
+                u.Auth0ID {nameof(User.Auth0Id)},
                 u.UserID {nameof(User.UserId)},
                 u.FirstName {nameof(User.FirstName)},
                 u.LastName {nameof(User.LastName)},

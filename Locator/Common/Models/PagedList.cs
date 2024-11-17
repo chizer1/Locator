@@ -1,4 +1,4 @@
-namespace Locator.Models.Read;
+namespace Locator.Common.Models;
 
 public class PagedList<T>(
     IEnumerable<T> items,

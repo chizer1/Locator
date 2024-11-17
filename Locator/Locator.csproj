@@ -19,4 +19,15 @@
       <Version>4.8.6</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Features\Clients\" />
+    <Folder Include="Features\ClientUsers\" />
+    <Folder Include="Features\Connections\" />
+    <Folder Include="Features\DatabaseServers\" />
+    <Folder Include="Features\Databases\" />
+    <Folder Include="Features\Permissions\" />
+    <Folder Include="Features\RolePermissions\" />
+    <Folder Include="Features\Roles\" />
+    <Folder Include="Features\UserRoles\" />
+  </ItemGroup>
 </Project>

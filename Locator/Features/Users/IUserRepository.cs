@@ -1,5 +1,5 @@
+using Locator.Common.Models;
 using Locator.Domain;
-using Locator.Models.Read;
 
 namespace Locator.Features.Users;
 

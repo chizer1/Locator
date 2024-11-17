@@ -1,7 +1,7 @@
 using System.Data.SqlClient;
+using Locator.Common.Models;
 using Locator.Domain;
-using Locator.Library.Users;
-using Locator.Models.Read;
+using Locator.Library;
 
 namespace Locator;
 
