@@ -1,4 +1,5 @@
 using System.Data.SqlClient;
+using Locator.Common;
 using Locator.Common.Models;
 using Locator.Domain;
 using Locator.Library;
@@ -8,6 +9,8 @@ namespace Locator;
 public class Locator
 {
     private readonly Users _users;
+    private readonly Clients _clients;
+    private readonly ClientUsers _clientUsers;
 
     public Locator(
         string locatorDbConnectionString,
@@ -19,8 +22,11 @@ public class Locator
     )
     {
         var locatorDb = new SqlConnection(locatorDbConnectionString);
+        var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret);
 
-        _users = new Users(locatorDb, auth0Url, auth0ClientId, auth0ClientSecret);
+        _users = new Users(locatorDb, auth0);
+        _clients = new Clients(locatorDb);
+        _clientUsers = new ClientUsers(locatorDb);
     }
 
     /// <summary>

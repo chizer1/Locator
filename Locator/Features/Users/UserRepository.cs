@@ -1,11 +1,11 @@
-using System.Data.SqlClient;
+using System.Data;
 using Dapper;
-using Locator.Domain;
 using Locator.Common.Models;
+using Locator.Domain;
 
 namespace Locator.Features.Users;
 
-internal class UserRepository(SqlConnection locatorDb) : IUserRepository
+internal class UserRepository(IDbConnection locatorDb) : IUserRepository
 {
     public async Task<int> AddUser(
         string firstName,

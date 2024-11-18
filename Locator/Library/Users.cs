@@ -17,14 +17,8 @@ public class Users
     private readonly UpdateUser _updateUser;
     private readonly DeleteUser _deleteUser;
 
-    public Users(
-        SqlConnection locatorDb,
-        string auth0Domain,
-        string auth0ClientId,
-        string auth0ClientSecret
-    )
+    public Users(SqlConnection locatorDb, Auth0 auth0)
     {
-        var auth0 = new Auth0(auth0Domain, auth0ClientId, auth0ClientSecret);
         IUserRepository userRepository = new UserRepository(locatorDb);
         IAuth0UserService auth0UserService = new Auth0UserService(auth0);
 
@@ -39,7 +33,7 @@ public class Users
         string lastName,
         string emailAddress,
         string password,
-        UserStatus status = UserStatus.Active
+        UserStatus status
     )
     {
         return await _addUser.Handle(
