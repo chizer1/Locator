@@ -8,9 +8,13 @@ namespace Locator;
 
 public class Locator
 {
-    private readonly Users _users;
     private readonly Clients _clients;
     private readonly ClientUsers _clientUsers;
+    private readonly Connections _connections;
+    private readonly Databases _databases;
+    private readonly DatabaseServers _databaseServers;
+    private readonly DatabaseTypes _databaseTypes;
+    private readonly Users _users;
 
     public Locator(
         string locatorDbConnectionString,
@@ -24,9 +28,14 @@ public class Locator
         var locatorDb = new SqlConnection(locatorDbConnectionString);
         var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret);
 
-        _users = new Users(locatorDb, auth0);
         _clients = new Clients(locatorDb);
         _clientUsers = new ClientUsers(locatorDb);
+        _connections = new Connections(locatorDb);
+        _databases = new Databases(locatorDb);
+        _databaseServers = new DatabaseServers(locatorDb);
+        _databaseTypes = new DatabaseTypes(locatorDb);
+
+        _users = new Users(locatorDb, auth0);
     }
 
     /// <summary>

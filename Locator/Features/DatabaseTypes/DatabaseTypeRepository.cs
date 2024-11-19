@@ -1,10 +1,11 @@
 using System.Data;
 using Dapper;
 using Locator.Domain;
+using Locator.Features.Databases;
 
 namespace Locator.Features.DatabaseTypes;
 
-internal class DatabaseTypeRepository(IDbConnection locatorDb)
+internal class DatabaseTypeRepository(IDbConnection locatorDb) : IDatabaseTypeRepository
 {
     public async Task<int> AddDatabaseType(string databaseTypeName)
     {

@@ -1,10 +1,11 @@
 using System.Data;
 using Dapper;
 using Locator.Domain;
+using Locator.Features.Databases;
 
 namespace Locator.Features.DatabaseServers;
 
-internal class DatabaseServerRepository(IDbConnection locatorDb)
+internal class DatabaseServerRepository(IDbConnection locatorDb) : IDatabaseServerRepository
 {
     public async Task<int> AddDatabaseServer(
         string databaseServerName,

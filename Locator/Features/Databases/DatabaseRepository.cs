@@ -5,7 +5,7 @@ using Locator.Domain;
 
 namespace Locator.Features.Databases;
 
-internal class DatabaseRepository(IDbConnection locatorDb)
+internal class DatabaseRepository(IDbConnection locatorDb) : IDatabaseRepository
 {
     public async Task<int> AddDatabase(
         string databaseName,
