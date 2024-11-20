@@ -3,7 +3,7 @@ using Dapper;
 
 namespace Locator.Features.UserRoles;
 
-internal class UserRoleRepository(IDbConnection locatorDb)
+internal class UserRoleRepository(IDbConnection locatorDb) : IUserRoleRepository
 {
     public async Task<int> AddUserRole(int userId, int roleId)
     {

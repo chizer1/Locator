@@ -4,7 +4,7 @@ using Locator.Domain;
 
 namespace Locator.Features.Roles;
 
-internal class RoleRepository(IDbConnection locatorDb)
+internal class RoleRepository(IDbConnection locatorDb) : IRoleRepository
 {
     public async Task<int> AddRole(string auth0RoleId, string roleName, string roleDescription)
     {

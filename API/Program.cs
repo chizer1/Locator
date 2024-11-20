@@ -144,34 +144,34 @@ app.MapDelete("/deleteUser", async (int userId) => await locator.DeleteUser(user
     .WithTags("User");
 
 #endregion
-//
-// #region Client Endpoints
-//
-// app.MapPost("/addClient", async (AddClient addClient) => await locator.AddClient(addClient))
-//     .WithTags("Client");
-//
-// app.MapGet("/getClient", async (int clientId) => await locator.GetClient(clientId))
-//     .WithTags("Client");
-//
-// app.MapGet("/getClients", async () => await locator.GetClients()).WithTags("Client");
-//
-// app.MapGet(
-//         "/getClientsWithPagination",
-//         async (string search, int pageNumber, int pageSize) =>
-//             await locator.GetClients(search, pageNumber, pageSize)
-//     )
-//     .WithTags("Client");
-//
-// app.MapPut(
-//         "/updateClient",
-//         async (UpdateClient updateClient) => await locator.UpdateClient(updateClient)
-//     )
-//     .WithTags("Client");
-//
-// app.MapDelete("/deleteClient", async (int clientId) => await locator.DeleteClient(clientId))
-//     .WithTags("Client");
-//
-// #endregion
+
+#region Client Endpoints
+
+app.MapPost(
+        "/addClient",
+        async (string clientName, string clientCode, ClientStatus clientStatus) =>
+            await locator.AddClient(clientName, clientCode, clientStatus)
+    )
+    .WithTags("Client");
+
+app.MapGet(
+        "/getClients",
+        async (string search, int pageNumber, int pageSize) =>
+            await locator.GetClients(search, pageNumber, pageSize)
+    )
+    .WithTags("Client");
+
+app.MapPut(
+        "/updateClient",
+        async (int clientId, string clientName, string clientCode, ClientStatus clientStatus) =>
+            await locator.UpdateClient(clientId, clientName, clientCode, clientStatus)
+    )
+    .WithTags("Client");
+
+app.MapDelete("/deleteClient", async (int clientId) => await locator.DeleteClient(clientId))
+    .WithTags("Client");
+
+#endregion
 //
 // #region Role Endpoints
 //

@@ -1,3 +1,26 @@
+using FluentValidation;
+
 namespace Locator.Features.Permissions.DeletePermission;
 
-public class DeletePermission { }
+internal class DeletePermissionCommand(int permissionId)
+{
+    public int PermissionId => permissionId;
+}
+
+internal sealed class DeletePermissionCommandValidator : AbstractValidator<DeletePermissionCommand>
+{
+    public DeletePermissionCommandValidator()
+    {
+        RuleFor(x => x.PermissionId).NotEmpty().WithMessage("Id is required.");
+    }
+}
+
+internal class DeletePermission(IPermissionRepository permissionRepository)
+{
+    public async Task Handle(DeletePermissionCommand command)
+    {
+        await new DeletePermissionCommandValidator().ValidateAndThrowAsync(command);
+
+        await permissionRepository.DeletePermission(command.PermissionId);
+    }
+}

@@ -4,7 +4,7 @@ using Locator.Domain;
 
 namespace Locator.Features.Permissions;
 
-internal class PermissionRepository(IDbConnection locatorDb)
+internal class PermissionRepository(IDbConnection locatorDb) : IPermissionRepository
 {
     public async Task<int> AddPermission(string permissionName, string permissionDescription)
     {

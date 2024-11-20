@@ -13,10 +13,10 @@ public class ClientUsers
 
     public ClientUsers(SqlConnection locatorDb)
     {
-        IClientUserRepository clientRepository = new ClientUserRepository(locatorDb);
+        IClientUserRepository clientUserRepository = new ClientUserRepository(locatorDb);
 
-        _addClientUser = new AddClientUser(clientRepository);
-        _deleteClientUser = new DeleteClientUser(clientRepository);
+        _addClientUser = new AddClientUser(clientUserRepository);
+        _deleteClientUser = new DeleteClientUser(clientUserRepository);
     }
 
     public async Task<int> AddClientUser(int clientId, int userId)
@@ -24,7 +24,7 @@ public class ClientUsers
         return await _addClientUser.Handle(new AddClientUserCommand(clientId, userId));
     }
 
-    public async Task DeleteClient(int clientId, int userId)
+    public async Task DeleteClientUser(int clientId, int userId)
     {
         await _deleteClientUser.Handle(new DeleteClientUserCommand(clientId, userId));
     }

@@ -3,7 +3,7 @@ using Dapper;
 
 namespace Locator.Features.RolePermissions;
 
-internal class RolePermissionRepository(IDbConnection locatorDb)
+internal class RolePermissionRepository(IDbConnection locatorDb) : IRolePermissionRepository
 {
     public async Task<int> AddRolePermission(int roleId, int permissionId)
     {
