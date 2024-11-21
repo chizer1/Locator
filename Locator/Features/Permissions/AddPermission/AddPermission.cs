@@ -1,4 +1,5 @@
 using FluentValidation;
+using Locator.Domain;
 
 namespace Locator.Features.Permissions.AddPermission;
 
@@ -19,11 +20,24 @@ internal sealed class AddPermissionCommandValidator : AbstractValidator<AddPermi
     }
 }
 
-internal class AddPermission(IPermissionRepository permissionRepository)
+internal class AddPermission(
+    IPermissionRepository permissionRepository,
+    IAuth0PermissionService auth0PermissionService
+)
 {
     public async Task<int> Handle(AddPermissionCommand command)
     {
         await new AddPermissionCommandValidator().ValidateAndThrowAsync(command);
+
+        var permissions = await permissionRepository.GetPermissions();
+        permissions.Add(
+            new Permission
+            {
+                PermissionName = command.PermissionName,
+                PermissionDescription = command.PermissionDescription,
+            }
+        );
+        await auth0PermissionService.UpdatePermissions(permissions);
 
         return await permissionRepository.AddPermission(
             command.PermissionName,

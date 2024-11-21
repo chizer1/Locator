@@ -10,10 +10,10 @@ internal class UpdateClientCommand(
     ClientStatus clientStatus
 )
 {
-    public int ClientId { get; } = clientId;
-    public string ClientName { get; } = clientName;
-    public string ClientCode { get; } = clientCode;
-    public ClientStatus ClientStatus { get; } = clientStatus;
+    public int ClientId => clientId;
+    public string ClientName => clientName;
+    public string ClientCode => clientCode;
+    public ClientStatus ClientStatus => clientStatus;
 }
 
 internal sealed class UpdateClientCommandValidator : AbstractValidator<UpdateClientCommand>

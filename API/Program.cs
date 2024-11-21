@@ -380,7 +380,7 @@ app.MapDelete(
 
 #endregion
 
-#region Role Permission Endpointss
+#region Role Permission Endpoints
 
 app.MapPost(
         "/addRolePermission",

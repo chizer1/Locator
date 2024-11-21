@@ -39,8 +39,8 @@ public class Locator
         _databases = new Databases(locatorDb);
         _databaseServers = new DatabaseServers(locatorDb);
         _databaseTypes = new DatabaseTypes(locatorDb);
-        _permissions = new Permissions(locatorDb);
-        _rolePermissions = new RolePermissions(locatorDb);
+        _permissions = new Permissions(locatorDb, auth0);
+        _rolePermissions = new RolePermissions(locatorDb, auth0);
         _roles = new Roles(locatorDb, auth0);
         _userRoles = new UserRoles(locatorDb, auth0);
         _users = new Users(locatorDb, auth0);

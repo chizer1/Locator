@@ -1,4 +1,5 @@
 using FluentValidation;
+using Locator.Features.Roles;
 
 namespace Locator.Features.RolePermissions.AddRolePermission;
 
@@ -18,15 +19,27 @@ internal sealed class AddRolePermissionCommandValidator
     }
 }
 
-internal class AddRolePermission(IRolePermissionRepository rolePermissionRepository)
+internal class AddRolePermission(
+    IRolePermissionRepository rolePermissionRepository,
+    IRoleRepository roleRepository,
+    IAuth0RolePermissionService auth0RolePermissionService
+)
 {
     public async Task<int> Handle(AddRolePermissionCommand command)
     {
         await new AddRolePermissionCommandValidator().ValidateAndThrowAsync(command);
 
-        return await rolePermissionRepository.AddRolePermission(
+        var role = await roleRepository.GetRole(command.RoleId);
+
+        var rolePermissionId = await rolePermissionRepository.AddRolePermission(
             command.RoleId,
             command.PermissionId
         );
+
+        var rolePermissions = await rolePermissionRepository.GetRolePermissions(command.RoleId);
+
+        await auth0RolePermissionService.UpdateRolePermissions(role.Auth0RoleId, rolePermissions);
+
+        return rolePermissionId;
     }
 }

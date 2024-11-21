@@ -5,9 +5,9 @@ namespace Locator.Features.Clients.AddClient;
 
 internal class AddClientCommand(string clientName, string clientCode, ClientStatus clientStatus)
 {
-    public string ClientName { get; } = clientName;
-    public string ClientCode { get; } = clientCode;
-    public ClientStatus ClientStatus { get; } = clientStatus;
+    public string ClientName => clientName;
+    public string ClientCode => clientCode;
+    public ClientStatus ClientStatus => clientStatus;
 }
 
 internal sealed class AddClientCommandValidator : AbstractValidator<AddClientCommand>

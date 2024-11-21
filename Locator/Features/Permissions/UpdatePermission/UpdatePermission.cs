@@ -25,7 +25,10 @@ internal sealed class UpdatePermissionCommandValidator : AbstractValidator<Updat
     }
 }
 
-internal class UpdatePermission(IPermissionRepository permissionRepository)
+internal class UpdatePermission(
+    IPermissionRepository permissionRepository,
+    IAuth0PermissionService auth0PermissionService
+)
 {
     public async Task Handle(UpdatePermissionCommand command)
     {
@@ -36,5 +39,9 @@ internal class UpdatePermission(IPermissionRepository permissionRepository)
             command.PermissionName,
             command.PermissionDescription
         );
+
+        var permissions = await permissionRepository.GetPermissions();
+
+        await auth0PermissionService.UpdatePermissions(permissions);
     }
 }

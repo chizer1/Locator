@@ -1,4 +1,5 @@
 using FluentValidation;
+using Locator.Features.Roles;
 
 namespace Locator.Features.RolePermissions.DeleteRolePermission;
 
@@ -18,12 +19,21 @@ internal sealed class DeleteRolePermissionCommandValidator
     }
 }
 
-internal class DeleteRolePermission(IRolePermissionRepository rolePermissionRepository)
+internal class DeleteRolePermission(
+    IRolePermissionRepository rolePermissionRepository,
+    IRoleRepository roleRepository,
+    IAuth0RolePermissionService auth0RolePermissionService
+)
 {
     public async Task Handle(DeleteRolePermissionCommand command)
     {
         await new DeleteRolePermissionCommandValidator().ValidateAndThrowAsync(command);
 
         await rolePermissionRepository.DeleteRolePermission(command.RoleId, command.PermissionId);
+
+        var role = await roleRepository.GetRole(command.RoleId);
+        var rolePermissions = await rolePermissionRepository.GetRolePermissions(command.RoleId);
+
+        await auth0RolePermissionService.UpdateRolePermissions(role.Auth0RoleId, rolePermissions);
     }
 }

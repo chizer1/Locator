@@ -1,4 +1,5 @@
 using System.Data.SqlClient;
+using Locator.Common;
 using Locator.Domain;
 using Locator.Features.Permissions;
 using Locator.Features.Permissions.AddPermission;
@@ -15,14 +16,15 @@ public class Permissions
     private readonly DeletePermission _deletePermission;
     private readonly UpdatePermission _updatePermission;
 
-    public Permissions(SqlConnection locatorDb)
+    public Permissions(SqlConnection locatorDb, Auth0 auth0)
     {
         IPermissionRepository permissionTypeRepository = new PermissionRepository(locatorDb);
+        IAuth0PermissionService auth0PermissionService = new Auth0PermissionService(auth0);
 
-        _addPermission = new AddPermission(permissionTypeRepository);
+        _addPermission = new AddPermission(permissionTypeRepository, auth0PermissionService);
         _getPermissions = new GetPermissions(permissionTypeRepository);
-        _deletePermission = new DeletePermission(permissionTypeRepository);
-        _updatePermission = new UpdatePermission(permissionTypeRepository);
+        _deletePermission = new DeletePermission(permissionTypeRepository, auth0PermissionService);
+        _updatePermission = new UpdatePermission(permissionTypeRepository, auth0PermissionService);
     }
 
     public async Task<int> AddPermission(string permissionName, string permissionDescription)

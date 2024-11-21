@@ -100,4 +100,94 @@ internal class Auth0UserService(Auth0 auth0) : IAuth0UserService
         if (!response.IsSuccessStatusCode)
             throw new Exception($"Auth0 Exception. Failed to delete user: {responseString}");
     }
+
+    public async Task UpdateUserPassword(string auth0Id, string password)
+    {
+        var accessToken = await auth0.CreateAccessToken();
+
+        dynamic updatePasswordPayload = new
+        {
+            connection = "Username-Password-Authentication",
+            password,
+        };
+        string jsonContent = JsonConvert.SerializeObject(updatePasswordPayload);
+
+        var requestUri = $"https://{auth0.GetAuth0Domain()}/api/v2/users/{auth0Id}";
+        HttpRequestMessage request =
+            new(HttpMethod.Patch, requestUri)
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
+            };
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await new HttpClient().SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception(
+                $"Auth0 Exception. Failed to update user password: {responseString}"
+            );
+    }
+
+    public async Task<List<UserLog>> GetUserLogs(string auth0Id)
+    {
+        var accessToken = await auth0.CreateAccessToken();
+
+        var requestUri = $"https://{auth0.GetAuth0Domain()}/api/v2/users/{auth0Id}/logs";
+        HttpRequestMessage request = new(HttpMethod.Get, requestUri);
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await new HttpClient().SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Auth0 Exception. Failed to get user logs: {responseString}");
+
+        var userLogs = JsonConvert.DeserializeObject<List<UserLog>>(responseString);
+        foreach (var userLog in userLogs)
+        {
+            userLog.Type = userLog.Type switch
+            {
+                "s" => "Successful Login",
+                "ss" => "Successful Signup",
+                "f" => "Failed Login",
+                "fp" => "Failed Login (Incorrect Password)",
+                "seacft" => "Success Exchange",
+                "slo" => "Successful Sign out",
+                "scp" => "Success Change Password",
+                "scpr" => "Success Change Password Request",
+                "fcp" => "Failed Change Password",
+                "sce" => "Success Change Email",
+                _ => userLog.Type,
+            };
+        }
+
+        return userLogs;
+    }
+
+    public async Task<string> GeneratePasswordChangeTicket(string auth0Id, string redirectUrl)
+    {
+        var accessToken = await auth0.CreateAccessToken();
+
+        dynamic passwordChangePayload = new { user_id = auth0Id, result_url = redirectUrl };
+        string jsonContent = JsonConvert.SerializeObject(passwordChangePayload);
+
+        var requestUri = $"https://{auth0.GetAuth0Domain()}/api/v2/tickets/password-change";
+        HttpRequestMessage request =
+            new(HttpMethod.Post, requestUri)
+            {
+                Content = new StringContent(jsonContent, Encoding.UTF8, "application/json"),
+            };
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        using var response = await new HttpClient().SendAsync(request);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception(
+                $"Auth0 Exception. Failed to generate password change ticket: {responseString}"
+            );
+
+        return JObject.Parse(responseString)["ticket"]?.ToString();
+    }
 }

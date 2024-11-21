@@ -4,7 +4,7 @@ namespace Locator.Features.Clients.DeleteClient;
 
 internal class DeleteClientCommand(int clientId)
 {
-    public int ClientId { get; } = clientId;
+    public int ClientId => clientId;
 }
 
 internal sealed class DeleteClientCommandValidator : AbstractValidator<DeleteClientCommand>
