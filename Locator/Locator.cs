@@ -31,7 +31,7 @@ public class Locator
     )
     {
         var locatorDb = new SqlConnection(locatorDbConnectionString);
-        var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret);
+        var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
 
         _clients = new Clients(locatorDb);
         _clientUsers = new ClientUsers(locatorDb);
@@ -41,8 +41,8 @@ public class Locator
         _databaseTypes = new DatabaseTypes(locatorDb);
         _permissions = new Permissions(locatorDb);
         _rolePermissions = new RolePermissions(locatorDb);
-        _roles = new Roles(locatorDb);
-        _userRoles = new UserRoles(locatorDb);
+        _roles = new Roles(locatorDb, auth0);
+        _userRoles = new UserRoles(locatorDb, auth0);
         _users = new Users(locatorDb, auth0);
     }
 

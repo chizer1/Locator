@@ -15,11 +15,14 @@ internal sealed class DeleteRoleCommandValidator : AbstractValidator<DeleteRoleC
     }
 }
 
-internal class DeleteRole(IRoleRepository roleRepository)
+internal class DeleteRole(IRoleRepository roleRepository, IAuth0RoleService auth0RoleService)
 {
     public async Task Handle(DeleteRoleCommand command)
     {
         await new DeleteRoleCommandValidator().ValidateAndThrowAsync(command);
+
+        var role = await roleRepository.GetRole(command.RoleId);
+        await auth0RoleService.DeleteRole(role.Auth0RoleId);
 
         await roleRepository.DeleteRole(command.RoleId);
     }

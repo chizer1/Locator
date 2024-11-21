@@ -1,4 +1,6 @@
 using FluentValidation;
+using Locator.Features.Roles;
+using Locator.Features.Users;
 
 namespace Locator.Features.UserRoles.DeleteUserRole;
 
@@ -17,11 +19,21 @@ internal sealed class DeleteUserRoleCommandValidator : AbstractValidator<DeleteU
     }
 }
 
-internal class DeleteUserRole(IUserRoleRepository userRoleRepository)
+internal class DeleteUserRole(
+    IUserRoleRepository userRoleRepository,
+    IRoleRepository roleRepository,
+    IUserRepository userRepository,
+    IAuth0UserRoleService auth0UserRoleService
+)
 {
     public async Task Handle(DeleteUserRoleCommand command)
     {
         await new DeleteUserRoleCommandValidator().ValidateAndThrowAsync(command);
+
+        var user = await userRepository.GetUser(command.UserId);
+        var role = await roleRepository.GetRole(command.RoleId);
+
+        await auth0UserRoleService.DeleteUserRole(user.Auth0Id, role.Auth0RoleId);
 
         await userRoleRepository.DeleteUserRole(command.UserId, command.RoleId);
     }

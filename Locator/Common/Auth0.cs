@@ -4,11 +4,27 @@ using Newtonsoft.Json.Linq;
 
 namespace Locator.Common;
 
-public class Auth0(string auth0Domain, string auth0ClientId, string auth0ClientSecret)
+public class Auth0(
+    string auth0Domain,
+    string auth0ClientId,
+    string auth0ClientSecret,
+    string apiId,
+    string apiIdentifier
+)
 {
     public string GetAuth0Domain()
     {
         return auth0Domain;
+    }
+
+    public string GetApiId()
+    {
+        return apiId;
+    }
+
+    public string GetApiIdentifier()
+    {
+        return apiIdentifier;
     }
 
     public async Task<string> CreateAccessToken()

@@ -17,16 +17,14 @@ internal sealed class AddRoleCommandValidator : AbstractValidator<AddRoleCommand
     }
 }
 
-internal class AddRole(IRoleRepository roleRepository)
+internal class AddRole(IRoleRepository roleRepository, IAuth0RoleService auth0RoleService)
 {
     public async Task<int> Handle(AddRoleCommand command)
     {
         await new AddRoleCommandValidator().ValidateAndThrowAsync(command);
 
-        return await roleRepository.AddRole(
-            "Auth0RoleIdHere",
-            command.RoleName,
-            command.RoleDescription
-        );
+        var auth0RoleId = await auth0RoleService.AddRole(command.RoleName, command.RoleDescription);
+
+        return await roleRepository.AddRole(auth0RoleId, command.RoleName, command.RoleDescription);
     }
 }

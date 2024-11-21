@@ -1,4 +1,5 @@
 using System.Data.SqlClient;
+using Locator.Common;
 using Locator.Domain;
 using Locator.Features.Roles;
 using Locator.Features.Roles.AddRole;
@@ -15,14 +16,15 @@ public class Roles
     private readonly DeleteRole _deleteRoles;
     private readonly UpdateRole _updateRoles;
 
-    public Roles(SqlConnection locatorDb)
+    public Roles(SqlConnection locatorDb, Auth0 auth0)
     {
         IRoleRepository roleRepository = new RoleRepository(locatorDb);
+        IAuth0RoleService auth0UserService = new Auth0RoleService(auth0);
 
-        _addRoles = new AddRole(roleRepository);
+        _addRoles = new AddRole(roleRepository, auth0UserService);
         _getRoles = new GetRoles(roleRepository);
-        _deleteRoles = new DeleteRole(roleRepository);
-        _updateRoles = new UpdateRole(roleRepository);
+        _deleteRoles = new DeleteRole(roleRepository, auth0UserService);
+        _updateRoles = new UpdateRole(roleRepository, auth0UserService);
     }
 
     public async Task<int> AddRole(string roleName, string roleDescription)

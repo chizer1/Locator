@@ -1,7 +1,10 @@
 using System.Data.SqlClient;
+using Locator.Common;
+using Locator.Features.Roles;
 using Locator.Features.UserRoles;
 using Locator.Features.UserRoles.AddUserRole;
 using Locator.Features.UserRoles.DeleteUserRole;
+using Locator.Features.Users;
 
 namespace Locator.Library;
 
@@ -10,12 +13,25 @@ public class UserRoles
     private readonly AddUserRole _addUserRole;
     private readonly DeleteUserRole _deleteUserRole;
 
-    public UserRoles(SqlConnection locatorDb)
+    public UserRoles(SqlConnection locatorDb, Auth0 auth0)
     {
-        IUserRoleRepository clientRepository = new UserRoleRepository(locatorDb);
+        IUserRoleRepository userRoleRepository = new UserRoleRepository(locatorDb);
+        IUserRepository userRepository = new UserRepository(locatorDb);
+        IRoleRepository roleRepository = new RoleRepository(locatorDb);
+        IAuth0UserRoleService auth0UserService = new Auth0UserRoleService(auth0);
 
-        _addUserRole = new AddUserRole(clientRepository);
-        _deleteUserRole = new DeleteUserRole(clientRepository);
+        _addUserRole = new AddUserRole(
+            userRoleRepository,
+            roleRepository,
+            userRepository,
+            auth0UserService
+        );
+        _deleteUserRole = new DeleteUserRole(
+            userRoleRepository,
+            roleRepository,
+            userRepository,
+            auth0UserService
+        );
     }
 
     public async Task<int> AddUserRole(int userId, int roleId)

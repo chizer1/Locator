@@ -19,12 +19,19 @@ internal sealed class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleC
     }
 }
 
-internal class UpdateRole(IRoleRepository roleRepository)
+internal class UpdateRole(IRoleRepository roleRepository, IAuth0RoleService auth0RoleService)
 {
     public async Task Handle(UpdateRoleCommand command)
     {
         await new UpdateRoleCommandValidator().ValidateAndThrowAsync(command);
 
+        var role = await roleRepository.GetRole(command.RoleId);
+
+        await auth0RoleService.UpdateRole(
+            role.Auth0RoleId,
+            command.RoleName,
+            command.RoleDescription
+        );
         await roleRepository.UpdateRole(command.RoleId, command.RoleName, command.RoleDescription);
     }
 }
