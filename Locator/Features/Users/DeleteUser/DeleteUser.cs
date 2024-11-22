@@ -4,7 +4,7 @@ namespace Locator.Features.Users.DeleteUser;
 
 internal class DeleteUserCommand(int userId)
 {
-    public int UserId { get; } = userId;
+    public int UserId => userId;
 }
 
 internal sealed class DeleteUserCommandValidator : AbstractValidator<DeleteUserCommand>

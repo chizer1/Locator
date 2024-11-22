@@ -20,6 +20,7 @@ public class Locator
     private readonly Roles _roles;
     private readonly UserRoles _userRoles;
     private readonly Users _users;
+    private readonly HttpContextUtilities _httpContextUtilities;
 
     public Locator(
         string locatorDbConnectionString,
@@ -44,6 +45,7 @@ public class Locator
         _roles = new Roles(locatorDb, auth0);
         _userRoles = new UserRoles(locatorDb, auth0);
         _users = new Users(locatorDb, auth0);
+        _httpContextUtilities = new HttpContextUtilities();
     }
 
     #region Clients
@@ -420,11 +422,27 @@ public class Locator
     }
 
     /// <summary>
+    /// Generate Url for user to go update their password in Auth0
+    /// </summary>
+    public async Task<string> GeneratePasswordChangeTicket(string auth0Id, string redirectUrl)
+    {
+        return await _users.GeneratePasswordChangeTicket(auth0Id, redirectUrl);
+    }
+
+    /// <summary>
     /// Get users from locator database
     /// </summary>
     public async Task<PagedList<User>> GetUsers(string keyWord, int pageNumber, int pageSize)
     {
         return await _users.GetUsers(keyWord, pageNumber, pageSize);
+    }
+
+    /// <summary>
+    /// Get recent user log activity in Auth0
+    /// </summary>
+    public async Task<List<UserLog>> GetUserLogs(string auth0Id)
+    {
+        return await _users.GetUserLogs(auth0Id);
     }
 
     /// <summary>
@@ -443,6 +461,14 @@ public class Locator
     }
 
     /// <summary>
+    /// Update user password in Auth0
+    /// </summary>
+    public async Task UpdateUserPassword(string auth0, string password)
+    {
+        await _users.UpdateUserPassword(auth0, password);
+    }
+
+    /// <summary>
     /// Delete user from locator database and Auth0 tenant
     /// </summary>
     public async Task DeleteUser(int userId)
@@ -455,8 +481,8 @@ public class Locator
     /// <summary>
     ///Get a user's Auth0Id from an authenticated http request
     /// </summary>
-    public static string GetAuth0Id(HttpContext httpContext)
+    public string GetAuth0Id(HttpContext httpContext)
     {
-        return HttpContextUtilities.GetAuth0Id(httpContext);
+        return _httpContextUtilities.GetAuth0Id(httpContext);
     }
 }

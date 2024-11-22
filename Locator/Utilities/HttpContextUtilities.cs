@@ -2,9 +2,9 @@ using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Locator.Utilities;
 
-internal static class HttpContextUtilities
+internal class HttpContextUtilities
 {
-    public static string GetAuth0Id(HttpContext httpContext)
+    public string GetAuth0Id(HttpContext httpContext)
     {
         var idToken = GetAccessToken(httpContext);
 
@@ -14,7 +14,7 @@ internal static class HttpContextUtilities
         return GetAuth0Id(idToken);
     }
 
-    private static JsonWebToken GetAccessToken(HttpContext httpContext)
+    private JsonWebToken GetAccessToken(HttpContext httpContext)
     {
         var accessToken = httpContext
             .Request.Headers.Authorization.ToString()
@@ -30,12 +30,12 @@ internal static class HttpContextUtilities
         return handler.ReadJsonWebToken(accessToken);
     }
 
-    private static bool IsTokenExpired(JsonWebToken jsonWebToken)
+    private bool IsTokenExpired(JsonWebToken jsonWebToken)
     {
         return jsonWebToken.ValidTo < DateTime.UtcNow;
     }
 
-    private static string GetAuth0Id(JsonWebToken jsonWebToken)
+    private string GetAuth0Id(JsonWebToken jsonWebToken)
     {
         return jsonWebToken.Claims.First(claim => claim.Type == "sub").Value;
     }

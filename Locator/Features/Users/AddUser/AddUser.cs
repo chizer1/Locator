@@ -11,11 +11,11 @@ internal class AddUserCommand(
     UserStatus userStatus
 )
 {
-    public string FirstName { get; } = firstName;
-    public string LastName { get; } = lastName;
-    public string EmailAddress { get; } = emailAddress;
-    public string Password { get; } = password;
-    public UserStatus UserStatus { get; } = userStatus;
+    public string FirstName => firstName;
+    public string LastName => lastName;
+    public string EmailAddress => emailAddress;
+    public string Password => password;
+    public UserStatus UserStatus => userStatus;
 }
 
 internal sealed class AddUserCommandValidator : AbstractValidator<AddUserCommand>

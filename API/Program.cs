@@ -113,6 +113,16 @@ app.MapPost(
     )
     .WithTags("User");
 
+app.MapPost(
+        "generatePasswordChangeTicket",
+        async (string auth0Id, string redirectUrl) =>
+            await locator.GeneratePasswordChangeTicket(auth0Id, redirectUrl)
+    )
+    .WithTags("User");
+
+app.MapGet("/getUserLogs", async (string auth0Id) => await locator.GetUserLogs(auth0Id))
+    .WithTags("User");
+
 app.MapGet(
         "/getUsers",
         async (string keyword, int pageNumber, int pageSize) =>
@@ -138,6 +148,13 @@ app.MapPut(
                 password,
                 userStatus
             )
+    )
+    .WithTags("User");
+
+app.MapPut(
+        "/updateUserPassword",
+        async (string auth0Id, string password) =>
+            await locator.UpdateUserPassword(auth0Id, password)
     )
     .WithTags("User");
 

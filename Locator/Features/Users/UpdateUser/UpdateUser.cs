@@ -12,12 +12,12 @@ internal class UpdateUserCommand(
     UserStatus userStatus
 )
 {
-    public int UserId { get; } = userId;
-    public string FirstName { get; } = firstName;
-    public string LastName { get; } = lastName;
-    public string EmailAddress { get; } = emailAddress;
-    public string Password { get; } = password;
-    public UserStatus UserStatus { get; } = userStatus;
+    public int UserId => userId;
+    public string FirstName => firstName;
+    public string LastName => lastName;
+    public string EmailAddress => emailAddress;
+    public string Password => password;
+    public UserStatus UserStatus => userStatus;
 }
 
 internal sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>

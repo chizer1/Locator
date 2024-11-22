@@ -6,9 +6,9 @@ namespace Locator.Features.Users.GetUsers;
 
 internal class GetUsersQuery(string keyword, int pageNumber, int pageSize)
 {
-    public string Keyword { get; } = keyword;
-    public int PageNumber { get; } = pageNumber;
-    public int PageSize { get; } = pageSize;
+    public string Keyword => keyword;
+    public int PageNumber => pageNumber;
+    public int PageSize => pageSize;
 }
 
 internal sealed class GetUsersQueryValidator : AbstractValidator<GetUsersQuery>
