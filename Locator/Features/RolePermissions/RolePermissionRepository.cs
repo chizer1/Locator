@@ -37,7 +37,7 @@ internal class RolePermissionRepository(IDbConnection locatorDb) : IRolePermissi
                     p.PermissionDescription {nameof(Permission.PermissionDescription)}
                 from dbo.Permission p
                 inner join dbo.RolePermission r 
-                    on p.Permission = r.Permission
+                    on p.PermissionID = r.PermissionID
                 where 
                     r.RoleID = @RoleID",
                 new { roleId }

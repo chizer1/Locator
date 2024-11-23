@@ -11,7 +11,7 @@ internal class Auth0RoleService(Auth0 auth0) : IAuth0RoleService
     {
         var accessToken = await auth0.CreateAccessToken();
 
-        dynamic addRolePayload = new { roleName, roleDescription };
+        dynamic addRolePayload = new { name = roleName, description = roleDescription };
         var jsonContent = JsonConvert.SerializeObject(addRolePayload);
 
         var requestUri = $"https://{auth0.GetAuth0Domain()}/api/v2/roles";

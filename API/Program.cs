@@ -93,7 +93,7 @@ app.Use(
     async (context, next) =>
     {
         // uncomment below line for getting user context from token
-        //context.Items["Auth0Id"] = LocatorLib.GetAuth0Id(context);
+        context.Items["Auth0Id"] = locator.GetAuth0Id(context);
 
         await next();
     }
@@ -428,7 +428,6 @@ app.MapGet(
             return await db.QueryAsync<dynamic>("SELECT * FROM dbo.Stuff");
         }
     )
-    .WithTags("A Connection To Client DB")
-    .RequireAuthorization("admin:read");
-
+    .WithTags("A Connection To Client DB");
+    
 app.Run();

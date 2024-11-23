@@ -11,7 +11,7 @@ function App() {
     var accessToken = await getAccessTokenSilently();
 
     const response = await fetch(
-      "http://localhost:5022/getStuff?clientId=6005&databaseTypeId=32",
+      "http://localhost:5022/getStuff?clientId=7005&databaseTypeId=42",
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
