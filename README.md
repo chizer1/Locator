@@ -16,45 +16,48 @@ How to setup your Auth0 tenant (or use what I saved already)
 
 1. Create new tenant (aka Domain)
    - Auth0 Management API is automatically created (how to manage role, permissions, and users programtically)
-2. Create new custom API 
+2. Create new custom API
    - Save the Id and Identifier for your new custom API
    - A machine to machine application will be automatically created (be able to)
    - Disable creating an account through Auth0, I will need be done programmatically through the library
 3. Create machine to machine application and authorize your custom API and Auth0 Management API
 4. Auth0 Management API to MachineToMachine needs the following permissions.
-  - Users
-    - create:users
-    - update:users
-    - read:users
-    - delete:users
-  - Roles
-    - read:roles
-    - create:roles
-    - delete: roles
-    - update: roles
-  - Resource Server
-    - update:resource_servers
 
-  RBAC also needs to be enabled on custom api
+- Users
+  - create:users
+  - update:users
+  - read:users
+  - delete:users
+- Roles
+  - read:roles
+  - create:roles
+  - delete: roles
+  - update: roles
+- Resource Server
+  - update:resource_servers
 
-  How to setup database
+RBAC also needs to be enabled on custom api
 
-  1. For local development you can spin up a local SQL server instance with Docker 
-      - Run `docker compose up` from root of repository
-  2. Use SchemaZen to create the Locator database locally
-      - `dotnet schemazen script --server localhost --u sa --p '1StrongPwd!!' --database 'Locator' --scriptDir '\Locator\SQL\Schema\'`
-  3. Populate a couple of lookup tables
-      - Execute `\Locator\SQL\Scripts\Seed.sql` on your newly created LocatorDB
+How to setup database
+
+1. For local development you can spin up a local SQL server instance with Docker
+   - Run `docker compose up` from root of repository
+2. Use SchemaZen to create the Locator database locally
+   - `dotnet schemazen create --server localhost --u sa --p '1StrongPwd!!' --database 'Locator' --scriptDir 'Sql/Schema'`
+   - If you get the message 'Snaspshot dir Sql\Schema does not exist' verify the path is inline with your OS
+3. Populate a couple of lookup tables
+   - Execute `\Locator\SQL\Scripts\Seed.sql` on your newly created LocatorDB
 
 GET BASIC EXAMPLE WORKING
 
 - Start the API and React projects in different terminals
 - Call these API endpoints in Swagger
-  - Create a User 
+
+  - Create a User
   - Create a Client
   - Relate the User to the Client (ClientUser)
   - Create a Database Server (you should have running already, localhost)
-  - Create a Database Type 
+  - Create a Database Type
   - Create a Database connecting to your Database server and type previously created
   - Relate the ClientUser to this new Database (this says the user is allowed sql connections to the db)
   - Create a Role
