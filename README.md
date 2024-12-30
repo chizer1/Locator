@@ -2,6 +2,7 @@
 
 The purpose of the library is to help create SQL Server connections between multiple clients while also using Auth0 to manage users, roles and permissions.
 
+Below is the database model used in this library.
 ![image](https://github.com/user-attachments/assets/4dbfe593-6b2c-4c49-92e5-de60aa01cf0c)
 
 # Prerequisites
