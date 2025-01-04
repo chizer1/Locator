@@ -2,13 +2,8 @@
 
 namespace Locator.Db;
 
-internal class LocatorContext : DbContext
+internal class LocatorContext(DbContextOptions<LocatorContext> options) : DbContext(options)
 {
-    public LocatorContext() { }
-
-    public LocatorContext(DbContextOptions<LocatorContext> options)
-        : base(options) { }
-
     public virtual DbSet<ClientEntity> Clients { get; set; }
 
     public virtual DbSet<ClientUserEntity> ClientUsers { get; set; }
@@ -30,11 +25,6 @@ internal class LocatorContext : DbContext
     public virtual DbSet<UserEntity> Users { get; set; }
 
     public virtual DbSet<UserRoleEntity> UserRoles { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-        optionsBuilder.UseSqlServer(
-            "Server=localhost;Database=Locator;User Id=sa;Password=1StrongPwd!!;Encrypt=True;TrustServerCertificate=True;"
-        );
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
