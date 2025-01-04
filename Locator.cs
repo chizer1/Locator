@@ -38,10 +38,10 @@ public class Locator
             .Options;
 
         var locatorDb = new LocatorContext(options);
-        if (!locatorDb.Database.CanConnect())
-            throw new Exception("Could not connect to database");
-        else
-            locatorDb.Database.Migrate();
+        // if (!locatorDb.Database.CanConnect())
+        //     throw new Exception("Could not connect to database");
+        // else
+        locatorDb.Database.Migrate();
 
         var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
 
