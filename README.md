@@ -7,6 +7,9 @@ Below is the database model used in this library.
 
 # Prerequisites
 
+## Install Package
+`dotnet nuget add source https://nuget.pkg.github.com/chizer1/index.json --name Locator --username <YourGitHubUsername> --password <YourGitHubPAT>`
+
 ## Auth0 setup
 
 1. Create tenant (https://auth0.com/docs/get-started/auth0-overview/create-tenants)
