@@ -35,8 +35,6 @@ Below is the database model used in this library.
 1. First, you need an instance of SQL Server running. For local development, you can either:
    - Use the SQL Server image in this repository by running `docker compose up` from the root. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
    - Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-2. Create the Locator database on your local SQL Server.
-   - Run `dotnet ef database update` from the root of the repository.
 
 # How to use / examples
 
@@ -53,6 +51,8 @@ Locator.Locator locator =
     );
 ```
 It is up to you on how you want to store / retrieve these values.
+
+Initializing the Locator object will automatically run the EF core migration scripts / create the LocatorDB if not created yet
 
 - Documentation: https://chizer1.github.io/Locator/
 - Example repository implementing this class library: https://github.com/chizer1/Locator-Example
