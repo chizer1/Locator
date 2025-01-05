@@ -42,7 +42,7 @@ public class Locator
 
         if (!locatorDb.Database.EnsureCreated())
             throw new Exception("Locator database was not successfully created.");
-
+      
         var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
         if (!auth0.IsAuth0Configured())
             throw new Exception("Auth0 configuration is not valid.");
