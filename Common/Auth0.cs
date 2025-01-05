@@ -12,6 +12,15 @@ internal class Auth0(
     string apiIdentifier
 )
 {
+    public bool IsAuth0Configured()
+    {
+        return !string.IsNullOrEmpty(auth0Domain)
+            && !string.IsNullOrEmpty(auth0ClientId)
+            && !string.IsNullOrEmpty(auth0ClientSecret)
+            && !string.IsNullOrEmpty(apiId)
+            && !string.IsNullOrEmpty(apiIdentifier);
+    }
+
     public string GetAuth0Domain()
     {
         return auth0Domain;
