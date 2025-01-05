@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>d272d42c-e1c2-4586-89f9-7757267944e1</UserSecretsId>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RestorePackagesWithLockFile>True</RestorePackagesWithLockFile>
     <OutputType>Library</OutputType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -13,6 +14,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/chizer1/Locator</RepositoryUrl>
     <IsPackable>true</IsPackable>
+    <None Include="$(OutputPath)\$(AssemblyName).xml" Pack="true" PackagePath="lib\net8.0\" />
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.10.0" />
