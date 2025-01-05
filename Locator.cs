@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Locator;
 
+/// <summary>
+/// Locator class is the main class that is used to interact with the Locator database.
+/// </summary>
 public class Locator
 {
     private readonly Clients _clients;
@@ -24,6 +27,9 @@ public class Locator
     private readonly Users _users;
     private readonly HttpContextUtilities _httpContextUtilities;
 
+    /// <summary>
+    /// Constructor for Locator class
+    /// </summary>
     public Locator(
         string locatorDbConnectionString,
         string auth0Url,
