@@ -111,7 +111,7 @@ internal class LocatorContext(DbContextOptions<LocatorContext> options) : DbCont
             entity.Property(e => e.DatabaseServerId).HasColumnName("DatabaseServerID");
             entity.Property(e => e.DatabaseStatusId).HasColumnName("DatabaseStatusID");
             entity.Property(e => e.DatabaseTypeId).HasColumnName("DatabaseTypeID");
-            entity.Property(e => e.DatabaseUser).IsRequired().HasMaxLength(50).IsUnicode(false);
+            entity.Property(e => e.DatabaseUser).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.DatabaseUserPassword).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.UseTrustedConnection).IsRequired().HasDefaultValue(false);
 
