@@ -116,7 +116,6 @@ namespace Locator.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseId"));
 
                     b.Property<string>("DatabaseName")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
@@ -134,10 +133,19 @@ namespace Locator.Migrations
                         .HasColumnName("DatabaseTypeID");
 
                     b.Property<string>("DatabaseUser")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<string>("DatabaseUserPassword")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("UseTrustedConnection")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.HasKey("DatabaseId")
                         .HasName("PK_Database");

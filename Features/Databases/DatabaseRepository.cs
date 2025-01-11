@@ -12,28 +12,45 @@ namespace Locator.Features.Databases
             string databaseUser,
             int databaseServerId,
             byte databaseTypeId,
-            Status databaseStatus
+            Status databaseStatus,
+            bool useTrustedConnection,
+            bool createDatabase
         )
         {
             var database = new DatabaseEntity
             {
                 DatabaseName = databaseName,
-                DatabaseUser = databaseUser,
                 DatabaseServerId = databaseServerId,
                 DatabaseTypeId = databaseTypeId,
                 DatabaseStatusId = (byte)databaseStatus,
+                UseTrustedConnection = useTrustedConnection,
             };
+
+            var commands = new List<string>();
+
+            if (createDatabase)
+                commands.Add($"CREATE DATABASE {databaseName}");
+
+            if (!useTrustedConnection)
+            {
+                database.DatabaseUser = databaseUser;
+
+                var password = Guid.NewGuid().ToString();
+                database.DatabaseUserPassword = password; // encrypt here later
+
+                commands.AddRange(
+                    [
+                        $"CREATE LOGIN {databaseUser} WITH PASSWORD = '{password}'",
+                        $"USE {databaseName}; CREATE USER {databaseUser} FOR LOGIN {databaseUser}",
+                    ]
+                );
+            }
+
+            await EnsureDatabaseExists(databaseName, createDatabase);
+            await EnsureUserDoesNotExist(databaseUser);
 
             await locatorDb.Set<DatabaseEntity>().AddAsync(database);
             await locatorDb.SaveChangesAsync();
-
-            var commands = new[]
-            {
-                $"CREATE LOGIN {databaseUser} WITH PASSWORD = 'Skyline-Armory-Paramount3-Shut'",
-                $"CREATE DATABASE {databaseName}",
-                $"USE {databaseName}; CREATE USER {databaseUser} FOR LOGIN {databaseUser}",
-                $"USE {databaseName}; GRANT SELECT TO {databaseUser}",
-            };
 
             foreach (var commandText in commands)
             {
@@ -44,6 +61,33 @@ namespace Locator.Features.Databases
             }
 
             return database.DatabaseId;
+        }
+
+        private async Task EnsureDatabaseExists(string databaseName, bool createDatabase)
+        {
+            using var command = locatorDb.Database.GetDbConnection().CreateCommand();
+            command.CommandText =
+                $"SELECT COUNT(*) FROM sys.databases WHERE name = '{databaseName}'";
+            await locatorDb.Database.OpenConnectionAsync();
+            var result = await command.ExecuteScalarAsync();
+            if (result is int count)
+            {
+                if (createDatabase && count > 0)
+                    throw new InvalidOperationException($"Database {databaseName} already exists.");
+                if (!createDatabase && count == 0)
+                    throw new InvalidOperationException($"Database {databaseName} not found.");
+            }
+        }
+
+        private async Task EnsureUserDoesNotExist(string databaseUser)
+        {
+            using var command = locatorDb.Database.GetDbConnection().CreateCommand();
+            command.CommandText =
+                $"SELECT COUNT(*) FROM sys.server_principals WHERE name = '{databaseUser}'";
+            await locatorDb.Database.OpenConnectionAsync();
+            var result = await command.ExecuteScalarAsync();
+            if (result is int count && count > 0)
+                throw new InvalidOperationException($"User {databaseUser} already exists.");
         }
 
         public async Task<Database> GetDatabase(int databaseId)
@@ -57,7 +101,6 @@ namespace Locator.Features.Databases
             return new Database(
                 database.DatabaseId,
                 database.DatabaseName,
-                database.DatabaseUser,
                 database.DatabaseServerId,
                 (Status)database.DatabaseStatusId
             );
@@ -84,7 +127,6 @@ namespace Locator.Features.Databases
                 .Select(d => new Database(
                     d.DatabaseId,
                     d.DatabaseName,
-                    d.DatabaseUser,
                     d.DatabaseServerId,
                     (Status)d.DatabaseStatusId
                 ))

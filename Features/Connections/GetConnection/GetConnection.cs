@@ -2,8 +2,6 @@ using System.Data.SqlClient;
 using FluentValidation;
 using Locator.Domain;
 using Locator.Features.Clients;
-using Locator.Features.Databases;
-using Locator.Features.DatabaseServers;
 using Locator.Features.Users;
 
 namespace Locator.Features.Connections.GetConnection;
@@ -28,9 +26,7 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
 internal class GetConnection(
     IConnectionRepository connectionRepository,
     IClientRepository clientRepository,
-    IUserRepository userRepository,
-    IDatabaseRepository databaseRepository,
-    IDatabaseServerRepository databaseServerRepository
+    IUserRepository userRepository
 )
 {
     public async Task<SqlConnection> Handle(GetConnectionQuery query)
@@ -45,27 +41,10 @@ internal class GetConnection(
         if (user.Status == Status.Inactive)
             throw new Exception("Cannot connect to database since this user is inactive.");
 
-        var connection = await connectionRepository.GetConnection(
+        return await connectionRepository.GetSqlConnection(
             query.Auth0Id,
             query.ClientId,
             query.DatabaseTypeId
-        );
-
-        var database = await databaseRepository.GetDatabase(connection.DatabaseId);
-        if (database.Status == Status.Inactive)
-            throw new Exception("Cannot connect to database since this database is inactive.");
-
-        var databaseServer = await databaseServerRepository.GetDatabaseServer(
-            database.DatabaseServerId
-        );
-
-        return new SqlConnection(
-            $@"
-            Server={databaseServer.Name};
-            User Id={database.User};
-            Password=Skyline-Armory-Paramount3-Shut;
-            Database={database.Name};"
-        // change to trusted connection for windows auth or kerberos, and no password
         );
     }
 }

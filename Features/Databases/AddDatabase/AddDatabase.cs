@@ -8,7 +8,9 @@ internal class AddDatabaseCommand(
     string databaseUser,
     int databaseServerId,
     byte databaseTypeId,
-    Status databaseStatus
+    Status databaseStatus,
+    bool useTrustedConnection,
+    bool createDatabase
 )
 {
     public string DatabaseName => databaseName;
@@ -16,6 +18,8 @@ internal class AddDatabaseCommand(
     public int DatabaseServerId => databaseServerId;
     public byte DatabaseTypeId => databaseTypeId;
     public Status DatabaseStatus => databaseStatus;
+    public bool UseTrustedConnection => useTrustedConnection;
+    public bool CreateDatabase => createDatabase;
 }
 
 internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabaseCommand>
@@ -27,6 +31,10 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
         RuleFor(x => x.DatabaseServerId).NotEmpty().WithMessage("Database Server is required.");
         RuleFor(x => x.DatabaseTypeId).NotEmpty().WithMessage("Database Type is required.");
         RuleFor(x => x.DatabaseStatus).NotEmpty().WithMessage("Database Status is required.");
+        // RuleFor(x => x.UseTrustedConnection)
+        //     .NotEmpty()
+        //     .WithMessage("Use Trusted Connection is required.");
+        //RuleFor(x => x.CreateDatabase).NotEmpty().WithMessage("Create Database is required.");
     }
 }
 
@@ -41,7 +49,9 @@ internal class AddDatabase(IDatabaseRepository databaseRepository)
             command.DatabaseUser,
             command.DatabaseServerId,
             command.DatabaseTypeId,
-            command.DatabaseStatus
+            command.DatabaseStatus,
+            command.UseTrustedConnection,
+            command.CreateDatabase
         );
     }
 }

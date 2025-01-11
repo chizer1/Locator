@@ -5,10 +5,9 @@ namespace Locator.Domain;
 /// </summary>
 /// <param name="id">The database ID.</param>
 /// <param name="name">The name of the database.</param>
-/// <param name="user">The user associated with the database.</param>
 /// <param name="databaseServerId">The ID of the database server.</param>
 /// <param name="status">The status of the database.</param>
-public class Database(int id, string name, string user, int databaseServerId, Status status)
+public class Database(int id, string name, int databaseServerId, Status status)
 {
     /// <summary>
     /// Gets the database ID.
@@ -21,9 +20,9 @@ public class Database(int id, string name, string user, int databaseServerId, St
     public string Name { get; init; } = name;
 
     /// <summary>
-    /// Gets or sets the user associated with the database.
+    /// Use trusted connection.
     /// </summary>
-    public string User { get; set; } = user;
+    public bool UseTrustedConnection { get; set; }
 
     /// <summary>
     /// Gets the ID of the database server.
