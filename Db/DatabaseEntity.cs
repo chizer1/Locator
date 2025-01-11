@@ -8,11 +8,15 @@ internal class DatabaseEntity
 
     public string DatabaseUser { get; set; }
 
+    public string DatabaseUserPassword { get; set; }
+
     public int DatabaseServerId { get; set; }
 
     public byte DatabaseTypeId { get; set; }
 
     public byte DatabaseStatusId { get; set; }
+
+    public bool UseTrustedConnection { get; set; }
 
     public virtual ICollection<ConnectionEntity> Connections { get; set; } = [];
 

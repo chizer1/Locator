@@ -4,8 +4,6 @@ using Locator.Features.Connections;
 using Locator.Features.Connections.AddConnection;
 using Locator.Features.Connections.DeleteConnection;
 using Locator.Features.Connections.GetConnection;
-using Locator.Features.Databases;
-using Locator.Features.DatabaseServers;
 using Locator.Features.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,19 +20,9 @@ internal class Connections
         IConnectionRepository connectionRepository = new ConnectionRepository(locatorDb);
         IClientRepository clientRepository = new ClientRepository(locatorDb);
         IUserRepository userRepository = new UserRepository(locatorDb);
-        IDatabaseRepository databaseRepository = new DatabaseRepository(locatorDb);
-        IDatabaseServerRepository databaseServerRepository = new DatabaseServerRepository(
-            locatorDb
-        );
 
         _addConnection = new AddConnection(connectionRepository);
-        _getConnection = new GetConnection(
-            connectionRepository,
-            clientRepository,
-            userRepository,
-            databaseRepository,
-            databaseServerRepository
-        );
+        _getConnection = new GetConnection(connectionRepository, clientRepository, userRepository);
         _deleteConnection = new DeleteConnection(connectionRepository);
     }
 

@@ -10,7 +10,9 @@ internal interface IDatabaseRepository
         string databaseUser,
         int databaseServerId,
         byte databaseTypeId,
-        Status databaseStatus
+        Status databaseStatus,
+        bool useTrustedConnection,
+        bool createDatabase
     );
     public Task<Database> GetDatabase(int databaseId);
     public Task<PagedList<Database>> GetDatabases(string keyword, int pageNumber, int pageSize);

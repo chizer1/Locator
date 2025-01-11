@@ -31,7 +31,9 @@ internal class Databases
         string databaseUser,
         int databaseServerId,
         byte databaseTypeId,
-        Status databaseStatus
+        Status databaseStatus,
+        bool useTrustedConnection,
+        bool createDatabase
     )
     {
         return await _addDatabase.Handle(
@@ -40,7 +42,9 @@ internal class Databases
                 databaseUser,
                 databaseServerId,
                 databaseTypeId,
-                databaseStatus
+                databaseStatus,
+                useTrustedConnection,
+                createDatabase
             )
         );
     }

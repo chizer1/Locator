@@ -1,3 +1,4 @@
+using System.Data.SqlClient;
 using Locator.Common.Models;
 using Locator.Db;
 using Locator.Domain;
@@ -21,7 +22,11 @@ internal class ConnectionRepository(DbContext locatorDb) : IConnectionRepository
         return connection.ConnectionId;
     }
 
-    public async Task<Connection> GetConnection(string auth0Id, int clientId, int databaseTypeId)
+    public async Task<SqlConnection> GetSqlConnection(
+        string auth0Id,
+        int clientId,
+        int databaseTypeId
+    )
     {
         var connectionEntity =
             await locatorDb
@@ -36,10 +41,28 @@ internal class ConnectionRepository(DbContext locatorDb) : IConnectionRepository
                 )
                 .FirstOrDefaultAsync() ?? throw new KeyNotFoundException("Connection not found.");
 
-        return new Connection(
+        var connection = new Connection(
             connectionEntity.ConnectionId,
             connectionEntity.DatabaseId,
             connectionEntity.ClientUserId
+        );
+
+        var database =
+            await locatorDb
+                .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseServer)
+                .FirstOrDefaultAsync(d => d.DatabaseId == connection.DatabaseId)
+            ?? throw new KeyNotFoundException(
+                $"Database with ID {connection.DatabaseId} not found."
+            );
+
+        if (database.UseTrustedConnection)
+            return new SqlConnection(
+                $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};Trusted_Connection=True;"
+            );
+
+        return new SqlConnection(
+            $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};User Id={database.DatabaseUser};Password={database.DatabaseUserPassword};"
         );
     }
 

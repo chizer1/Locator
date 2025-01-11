@@ -196,6 +196,8 @@ public class Locator
     /// <param name="databaseServerId">Id of the database server</param>
     /// <param name="databaseTypeId">Id of the database type</param>
     /// <param name="databaseStatus">Status of the database</param>
+    /// <param name="useTrustedConnection">Use trusted connection</param>
+    /// <param name="createDatabase">Create database</param>
     /// <returns>DatabaseId</returns>
     /// <returns></returns>
     public async Task<int> AddDatabase(
@@ -203,7 +205,9 @@ public class Locator
         string databaseUser,
         int databaseServerId,
         byte databaseTypeId,
-        Status databaseStatus
+        Status databaseStatus,
+        bool useTrustedConnection,
+        bool createDatabase
     )
     {
         return await _databases.AddDatabase(
@@ -211,7 +215,9 @@ public class Locator
             databaseUser,
             databaseServerId,
             databaseTypeId,
-            databaseStatus
+            databaseStatus,
+            useTrustedConnection,
+            createDatabase
         );
     }
 
