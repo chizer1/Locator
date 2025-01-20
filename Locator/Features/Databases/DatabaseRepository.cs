@@ -60,6 +60,8 @@ namespace Locator.Features.Databases
                 await command.ExecuteNonQueryAsync();
             }
 
+            await SwapBackToLocatorDatabase();
+
             return database.DatabaseId;
         }
 
@@ -184,6 +186,8 @@ namespace Locator.Features.Databases
                 await locatorDb.Database.OpenConnectionAsync();
                 await command.ExecuteNonQueryAsync();
             }
+
+            await SwapBackToLocatorDatabase();
         }
 
         public async Task DeleteDatabase(int databaseId)
@@ -208,6 +212,16 @@ namespace Locator.Features.Databases
                 await locatorDb.Database.OpenConnectionAsync();
                 await command.ExecuteNonQueryAsync();
             }
+
+            await SwapBackToLocatorDatabase();
+        }
+
+        private async Task SwapBackToLocatorDatabase()
+        {
+            using var swapCommand = locatorDb.Database.GetDbConnection().CreateCommand();
+            swapCommand.CommandText = "use [Locator]";
+            await locatorDb.Database.OpenConnectionAsync();
+            await swapCommand.ExecuteNonQueryAsync();
         }
     }
 }
