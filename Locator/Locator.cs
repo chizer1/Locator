@@ -1,4 +1,5 @@
 using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
 using Locator.Common;
 using Locator.Common.Models;
 using Locator.Db;
@@ -6,6 +7,8 @@ using Locator.Domain;
 using Locator.Library;
 using Locator.Utilities;
 using Microsoft.EntityFrameworkCore;
+
+[assembly: InternalsVisibleTo("LocatorTests")]
 
 namespace Locator;
 
@@ -49,6 +52,34 @@ public class Locator
         var auth0 = new Auth0(auth0Url, auth0ClientId, auth0ClientSecret, apiId, apiIdentifier);
         if (!auth0.IsAuth0Configured())
             throw new Exception("Auth0 configuration is not valid.");
+
+        _clients = new Clients(locatorDb);
+        _clientUsers = new ClientUsers(locatorDb);
+        _connections = new Connections(locatorDb);
+        _databases = new Databases(locatorDb);
+        _databaseServers = new DatabaseServers(locatorDb);
+        _databaseTypes = new DatabaseTypes(locatorDb);
+        _permissions = new Permissions(locatorDb, auth0);
+        _rolePermissions = new RolePermissions(locatorDb, auth0);
+        _roles = new Roles(locatorDb, auth0);
+        _userRoles = new UserRoles(locatorDb, auth0);
+        _users = new Users(locatorDb, auth0);
+        _httpContextUtilities = new HttpContextUtilities();
+    }
+
+    /// <summary>
+    /// Constructor for Locator class for Unit Testing, without Auth0 configuration
+    /// </summary>
+    internal Locator(string locatorDbConnectionString)
+    {
+        // Set Auth0 configuration to empty strings
+        var auth0 = new Auth0("", "", "", "", "");
+        var options = new DbContextOptionsBuilder<LocatorContext>()
+            .UseSqlServer(locatorDbConnectionString)
+            .Options;
+
+        var locatorDb = new LocatorContext(options);
+        locatorDb.Database.Migrate();
 
         _clients = new Clients(locatorDb);
         _clientUsers = new ClientUsers(locatorDb);
