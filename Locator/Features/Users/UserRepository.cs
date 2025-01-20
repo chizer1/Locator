@@ -104,7 +104,13 @@ internal class UserRepository(DbContext locatorDb) : IUserRepository
         var query = locatorDb.Set<UserEntity>().AsQueryable();
 
         if (!string.IsNullOrEmpty(keyword))
-            query = query.Where(u => u.LastName.Contains(keyword));
+        {
+            var hasKeyword = (string compare) =>
+                compare.Contains(keyword, StringComparison.CurrentCultureIgnoreCase);
+            query = query.Where(u =>
+                hasKeyword(u.FirstName) || hasKeyword(u.LastName) || hasKeyword(u.EmailAddress)
+            );
+        }
 
         var totalCount = await query.CountAsync();
 
