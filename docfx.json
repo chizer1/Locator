@@ -4,9 +4,9 @@
     {
       "src": [
         {
-          "src": "./",
+          "src": "Locator",
           "files": [
-            "**/*.csproj"
+            "Locator.csproj"
           ]
         }
       ],
