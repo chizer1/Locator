@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Locator.Migrations
 {
     [DbContext(typeof(LocatorContext))]
-    partial class LocatorContextModelSnapshot : ModelSnapshot
+    internal class LocatorContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

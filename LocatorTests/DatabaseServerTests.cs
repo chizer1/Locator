@@ -1,19 +1,12 @@
-using System.Linq;
-using Locator;
-using Locator.Domain;
 using LocatorTests.Fixtures;
+using LocatorTests.Utilities;
 
 namespace LocatorTests;
 
 [Collection("Locator")]
-public class DatabaseServerTests
+public class DatabaseServerTests(LocatorFixture locatorFixture)
 {
-    private readonly Locator.Locator _locator;
-
-    public DatabaseServerTests(LocatorFixture locatorFixture)
-    {
-        _locator = locatorFixture.Locator;
-    }
+    private readonly Locator.Locator _locator = locatorFixture.Locator;
 
     [Fact]
     public async Task AddMultipleDatabaseServersAndSearchByKeyWord()
@@ -36,7 +29,7 @@ public class DatabaseServerTests
             .Where(x => x.Name == databaseServerName)
             .ToList();
 
-        Assert.True(databaseServers.Count() == 1);
+        Assert.Single(databaseServers);
         Assert.Equal(databaseServerName, databaseServers[0].Name);
         Assert.Equal(databaseServerLocation, databaseServers[0].IpAddress);
     }
@@ -55,7 +48,7 @@ public class DatabaseServerTests
         var databaseServer = (await _locator.GetDatabaseServers())
             .Where(x => x.Name == databaseServerName)
             .ToList();
-        Assert.True(databaseServer.Count() == 0);
+        Assert.Empty(databaseServer);
     }
 
     [Fact]
@@ -80,7 +73,7 @@ public class DatabaseServerTests
             .Where(x => x.Name == databaseServerName2)
             .ToList();
 
-        Assert.True(databaseServers.Count() == 1);
+        Assert.Single(databaseServers);
         Assert.Equal(databaseServerName2, databaseServers[0].Name);
         Assert.Equal(databaseServerLocation2, databaseServers[0].IpAddress);
     }
