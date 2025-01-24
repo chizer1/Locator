@@ -1,6 +1,4 @@
-using System;
-
-namespace LocatorTests;
+namespace LocatorTests.Utilities;
 
 public static class StringUtilities
 {

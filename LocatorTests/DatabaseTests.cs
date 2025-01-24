@@ -1,14 +1,13 @@
-using System.Linq;
-using Locator;
 using Locator.Domain;
 using LocatorTests.Fixtures;
+using LocatorTests.Utilities;
 
 namespace LocatorTests;
 
 [Collection("Locator")]
 public class DatabaseTests
 {
-    private Locator.Locator _locator;
+    private readonly Locator.Locator _locator;
     private readonly int _databaseServerID;
     private readonly byte _databaseTypeId;
 
@@ -16,7 +15,7 @@ public class DatabaseTests
     {
         _locator = locatorFixture.Locator;
         _databaseServerID = _locator.AddDatabaseServer("DatabaseServer", "localhost").Result;
-        _databaseTypeId = (byte)(_locator.AddDatabaseType("DatabaseType").Result);
+        _databaseTypeId = (byte)_locator.AddDatabaseType("DatabaseType").Result;
     }
 
     [Fact]
@@ -46,10 +45,8 @@ public class DatabaseTests
             true
         );
 
-        var databases = (
-            await _locator.GetDatabases(databaseName.Substring(0, 5), 1, 25)
-        ).Items.ToList();
-        Assert.True(databases.Count() == 1);
+        var databases = (await _locator.GetDatabases(databaseName[..5], 1, 25)).Items.ToList();
+        Assert.Single(databases);
         Assert.Equal(databaseName, databases[0].Name);
     }
 
@@ -70,8 +67,8 @@ public class DatabaseTests
 
         await _locator.DeleteDatabase(databaseId);
 
-        var database = await _locator.GetDatabases(databaseName.Substring(0, 8), 1, 25);
-        Assert.True(database.Items.Count() == 0);
+        var database = await _locator.GetDatabases(databaseName[..8], 1, 25);
+        Assert.Empty(database.Items);
     }
 
     [Fact]
@@ -100,14 +97,10 @@ public class DatabaseTests
             Status.Inactive
         );
 
-        var oldDatabases = (
-            await _locator.GetDatabases(databaseName.Substring(0, 8), 1, 25)
-        ).Items.ToList();
-        Assert.True(oldDatabases.Count() == 0);
+        var oldDatabases = (await _locator.GetDatabases(databaseName[..8], 1, 25)).Items.ToList();
+        Assert.Empty(oldDatabases);
 
-        var newDatabases = (
-            await _locator.GetDatabases(databaseName2.Substring(0, 8), 1, 25)
-        ).Items.ToList();
+        var newDatabases = (await _locator.GetDatabases(databaseName2[..8], 1, 25)).Items.ToList();
         Assert.Equal(databaseName2, newDatabases[0].Name);
         Assert.Equal(Status.Inactive, newDatabases[0].Status);
     }

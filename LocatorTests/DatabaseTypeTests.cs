@@ -1,18 +1,12 @@
-using System.Linq;
-using Locator;
 using LocatorTests.Fixtures;
+using LocatorTests.Utilities;
 
 namespace LocatorTests;
 
 [Collection("Locator")]
-public class DatabaseTypeTests
+public class DatabaseTypeTests(LocatorFixture locatorFixture)
 {
-    private readonly Locator.Locator _locator;
-
-    public DatabaseTypeTests(LocatorFixture locatorFixture)
-    {
-        _locator = locatorFixture.Locator;
-    }
+    private readonly Locator.Locator _locator = locatorFixture.Locator;
 
     [Fact]
     public async Task AddMultipleDatabaseTypesAndSearchByKeyWord()
@@ -27,7 +21,7 @@ public class DatabaseTypeTests
             .Where(x => x.Name == databaseTypeName)
             .ToList();
 
-        Assert.True(databaseTypes.Count() == 1);
+        Assert.Single(databaseTypes);
         Assert.Equal(databaseTypeName, databaseTypes[0].Name);
     }
 
@@ -41,7 +35,8 @@ public class DatabaseTypeTests
         var databaseType = (await _locator.GetDatabaseTypes())
             .Where(x => x.Name == databaseTypeName)
             .ToList();
-        Assert.True(databaseType.Count() == 0);
+
+        Assert.Empty(databaseType);
     }
 
     [Fact]
@@ -56,11 +51,11 @@ public class DatabaseTypeTests
         var oldDatabaseTypes = (await _locator.GetDatabaseTypes())
             .Where(x => x.Name == databaseTypeName)
             .ToList();
-        Assert.True(oldDatabaseTypes.Count() == 0);
+        Assert.Empty(oldDatabaseTypes);
 
         var newDatabaseTypes = (await _locator.GetDatabaseTypes())
             .Where(x => x.Name == databaseTypeName2)
             .ToList();
-        Assert.True(newDatabaseTypes.Count() == 1);
+        Assert.Single(newDatabaseTypes);
     }
 }

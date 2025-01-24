@@ -54,5 +54,5 @@ It is up to you on how you want to store / retrieve these values.
 
 Initializing the Locator object will automatically run the EF core migration scripts / create the LocatorDB if not created yet
 
-- Documentation: https://chizer1.github.io/Locator/
+- Documentation: https://chizer1.github.io/Locator/api/Locator.html
 - Example repository implementing this class library: https://github.com/chizer1/Locator-Example
