@@ -5,7 +5,7 @@
 namespace Locator.Migrations
 {
     /// <inheritdoc />
-    public partial class DatabaseUpdates : Migration
+    internal partial class DatabaseUpdates : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
